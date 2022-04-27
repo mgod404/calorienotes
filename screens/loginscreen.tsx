@@ -23,9 +23,11 @@ const LoginScreen = () => {
             />
             <View style={styles.buttons}>
                 <Button 
+                    onPress={() => console.log('Bttn pressed')}
                     title='Login'
                     color='darkviolet'/>
                 <Button 
+                    onPress={() => console.log('Bttn pressed')}
                     title='Signin'
                     color='darkviolet'/>
             </View>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
-import DatePicker from 'react-native-date-picker'
-import { Button } from 'react-native-paper';
+import { View, Text, StyleSheet, SafeAreaView, Platform, StatusBar  } from 'react-native'
+import { Button } from 'react-native-paper'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 interface Props {
     date: Date,
@@ -9,7 +9,31 @@ interface Props {
 }
 
 const DatePickerComponent: React.FC<Props> = (props) => {
-    const [open, setOpen] = useState<boolean>(false);
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+  
+    const onChange = (event:any, selectedDate:Date | undefined) => {
+      const currentDate = selectedDate;
+      setShow(false);
+      if(currentDate){
+        props.setDate(currentDate);
+      }
+    };
+  
+    const showMode = (currentMode:string) => {
+      setShow(true);
+      setMode(currentMode);
+    };
+  
+    const showDatepicker = () => {
+      showMode('date');
+    };
+  
+    const showTimepicker = () => {
+      showMode('time');
+    };
+
+
 
     const changeDay = (date: Date, days: number): Date => {
         let newDate: Date = new Date(Date.now());
@@ -18,7 +42,7 @@ const DatePickerComponent: React.FC<Props> = (props) => {
     };
 
 return (
-    <View style={styles.buttonsWrapper}>
+    <SafeAreaView style={styles.AndroidSafeArea}>
 
         <Button 
             icon='chevron-left'
@@ -31,7 +55,7 @@ return (
         <Button 
             style={styles.middleButton}
             mode='text' 
-            onPress={() => setOpen(true)}
+            onPress={showDatepicker}
             >
             <Text>{props.date.toDateString()}</Text>
         </Button>
@@ -42,45 +66,42 @@ return (
             onPress={() => props.setDate(changeDay(props.date, +1))}
             >
         </Button>
+        {show && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={props.date}
+            mode={'date'}
+            is24Hour={true}
+            onChange={onChange}
+            textColor ={'darkviolet'}
+          />
+        )}
 
-        <DatePicker
-            modal
-            mode="date"
-            open={open}
-            date={props.date}
-            onConfirm={(date) => {
-                setOpen(false)
-                props.setDate(date)
-            }}
-            onCancel={() => {
-                setOpen(false)
-            }}
-        />
-
-    </View>
+    </SafeAreaView>
 )}
 
 const styles = StyleSheet.create({
-    buttonsWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        backgroundColor: 'darkviolet',
-    },
     middleButton: {
-        flex:0.5,
+        flex:0.6,
         display:'flex',
         justifyContent:'center',
         color:'#d5d8dc',
     },
     sideButton:{
-        flex:0.25,
+        flex:0.20,
         display:'flex',
         justifyContent:'center'
     },
     buttonText: {
         display:'flex',
         justifyContent:'center'
-    }
+    },
+    AndroidSafeArea: {
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        backgroundColor: 'darkviolet',
+    },
 });
 
 export default DatePickerComponent

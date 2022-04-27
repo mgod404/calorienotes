@@ -1,13 +1,14 @@
-import React, { useState } from 'react'
-import { View, StyleSheet } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { View, StyleSheet, Modal } from 'react-native'
 import { IconButton, Text } from 'react-native-paper';
 
 import DatePickerComponent from '../components/datepicker'
 import MealListItemComponent from '../components/meallistitem'
 import BottomBarComponent  from '../components/bottombar'
+import AddMealComponent from '../components/addmeal';
 
 
-interface Meal {
+export interface Meal {
     name: string,
     weight: number,
     carbs: number,
@@ -16,7 +17,16 @@ interface Meal {
 }
 
 const HomeScreen = () => {
+    const [showAddMeal, setShowAddMeal] = useState(false);
+    const [isNewMeal, setIsNewMeal] = useState(false);
     const [date, setDate] = useState<Date>(new Date());
+    const [meal, setMeal] = React.useState<Meal>({
+        name: '',
+        weight: 0,
+        carbs: 0,
+        fat: 0,
+        protein: 0,
+    });
     const [meals, setMeals] = useState<Array<Meal>>([
         {
             name: 'French Fries',
@@ -36,11 +46,23 @@ const HomeScreen = () => {
 
     return (
         <View style={styles.container}>
-            <DatePickerComponent date={date} setDate={setDate}/>
-            <MealListItemComponent meals={meals}/>
+            <DatePickerComponent 
+                date={date} 
+                setDate={setDate}
+            />
+            <MealListItemComponent 
+                setMeals={setMeals} 
+                meals={meals}
+                setIsNewMeal={setIsNewMeal}
+                setShowAddMeal={setShowAddMeal}
+            />
             <View style={styles.bottom}>
                 <View style={styles.buttons}>
                     <IconButton 
+                        onPress={() => {
+                            setIsNewMeal(true);
+                            setShowAddMeal(true);
+                        }}
                         icon="plus-circle"
                         color={'darkviolet'}
                         size={60}
@@ -51,6 +73,15 @@ const HomeScreen = () => {
                         size={60}
                         />
                 </View>
+                { showAddMeal && 
+                    <AddMealComponent 
+                        isNewMeal={isNewMeal}
+                        meals={meals}
+                        setMeals={setMeals} 
+                        setShowAddMeal={setShowAddMeal}
+                        meal={meal}
+                        setMeal={setMeal}
+                    />}
                 <BottomBarComponent />
             </View>
         </View>

@@ -5,6 +5,7 @@ import { DefaultTheme,Provider as PaperProvider } from 'react-native-paper';
 
 import HomeScreen from './screens/homescreen'
 import LoginScreen from './screens/loginscreen'
+import TestScreen from './screens/testscreen';
 
 
 
@@ -38,6 +39,7 @@ const App = () => {
         <Stack.Navigator initialRouteName="Home">
           <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}}/>
           <Stack.Screen name="Login" component={LoginScreen} options={{headerShown:false}}/>
+          <Stack.Screen name="Test" component={TestScreen} options={{headerShown:false}}/>
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
