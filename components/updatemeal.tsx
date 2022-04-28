@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { View, StyleSheet, Modal, TextInput } from 'react-native'
-import { Button, IconButton, Text, Divider } from 'react-native-paper';
+import { Button, IconButton, Text } from 'react-native-paper';
 
 import BarCodeScannerComponent from './barcodescanner';
 
@@ -8,21 +8,27 @@ import { Meal } from '../screens/homescreen';
 
 
 interface Props {
-    setShowAddMeal: React.Dispatch<React.SetStateAction<boolean>>,
+
     setMeals: React.Dispatch<React.SetStateAction<Meal[]>>,
     meals: Meal[],
+    setShowUpdateMeal: React.Dispatch<React.SetStateAction<boolean>>,
+    updateMealIndex: number | undefined,
     meal: Meal,
     setMeal: React.Dispatch<React.SetStateAction<Meal>>,
 }
 
-const AddMealComponent: React.FC<Props> = ({setShowAddMeal, setMeals, meals, meal, setMeal}) => {
-    const [showBarCodeScanner, setShowBarCodeScanner] = useState<boolean>(false);
+const UpdateMealComponent: React.FC<Props> = ({ setMeals, meals, setShowUpdateMeal, updateMealIndex, meal, setMeal}) => {
 
-
-    const updateMeals = () => {
-        let newMeals:Meal[] = [...meals, meal];
+    const updateMeals = (passedIndex:number | undefined, updatedMeal:Meal) => {
+        if(passedIndex === undefined){
+            alert('undefined Index, cannot update meal');
+            return
+        }
+        let newMeals = meals.filter((element,index) => index != passedIndex);
+        newMeals = [...newMeals, updatedMeal];
         setMeals(newMeals);
     }
+
     const countCalories = () => {
         return (meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
     }
@@ -34,7 +40,7 @@ const AddMealComponent: React.FC<Props> = ({setShowAddMeal, setMeals, meals, mea
                     <IconButton 
                         style={{alignSelf:'flex-end'}}
                         icon='window-close' 
-                        onPress={() => setShowAddMeal(false)}
+                        onPress={() => setShowUpdateMeal(false)}
                     />
                         <View style={{display:'flex', flexDirection: 'row',}}>
                             <TextInput
@@ -94,34 +100,20 @@ const AddMealComponent: React.FC<Props> = ({setShowAddMeal, setMeals, meals, mea
                             style={styles.flexBttn} 
                             color='darkviolet' 
                             mode='contained'
-                            onPress={() => setShowBarCodeScanner(true)}
-                            >
-                                Scan
-                        </Button>
-                        <Button 
-                            style={styles.flexBttn} 
-                            color='darkviolet' 
-                            mode='contained'
                             onPress={() => {
                                 if(meal.weight == 0){
                                     alert(`Please, set value for food weight.`);
                                     return
                                 }
-                                updateMeals();
-                                setShowAddMeal(false);
+                                updateMeals(updateMealIndex, meal);
+                                setShowUpdateMeal(false);
                             }}
                             >
-                                Add Meal
+                                Update Meal
                         </Button>
                     </View>
                 </View>
             </View>
-            {showBarCodeScanner && 
-                    <Modal>
-                        <BarCodeScannerComponent 
-                            setMeal={setMeal}
-                            setShowBarCodeScanner={setShowBarCodeScanner}/>
-                    </Modal>}
         </Modal>
     )
 }
@@ -174,4 +166,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default AddMealComponent
+export default UpdateMealComponent

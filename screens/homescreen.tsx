@@ -6,6 +6,8 @@ import DatePickerComponent from '../components/datepicker'
 import MealListItemComponent from '../components/meallistitem'
 import BottomBarComponent  from '../components/bottombar'
 import AddMealComponent from '../components/addmeal';
+import UpdateMealComponent from '../components/updatemeal';
+import AddNoteComponent from '../components/addnote';
 
 
 export interface Meal {
@@ -18,8 +20,7 @@ export interface Meal {
 
 const HomeScreen = () => {
     const [showAddMeal, setShowAddMeal] = useState(false);
-    const [isNewMeal, setIsNewMeal] = useState(false);
-    const [date, setDate] = useState<Date>(new Date());
+
     const [meal, setMeal] = React.useState<Meal>({
         name: '',
         weight: 0,
@@ -27,6 +28,11 @@ const HomeScreen = () => {
         fat: 0,
         protein: 0,
     });
+
+    const [showUpdateMeal, setShowUpdateMeal] = useState(false);
+    const [updateMealIndex, setUpdateMealIndex] = useState<number>();
+
+    const [date, setDate] = useState<Date>(new Date());
     const [meals, setMeals] = useState<Array<Meal>>([
         {
             name: 'French Fries',
@@ -43,6 +49,8 @@ const HomeScreen = () => {
             protein: 40,
         },
     ]);
+    const [note, setNote] = useState('');
+    const [showAddNote, setShowAddNote] = useState(false);
 
     return (
         <View style={styles.container}>
@@ -51,18 +59,16 @@ const HomeScreen = () => {
                 setDate={setDate}
             />
             <MealListItemComponent 
-                setMeals={setMeals} 
                 meals={meals}
-                setIsNewMeal={setIsNewMeal}
-                setShowAddMeal={setShowAddMeal}
+                setMeals={setMeals} 
+                setMeal={setMeal}
+                setShowUpdateMeal={setShowUpdateMeal}
+                setUpdateMealIndex={setUpdateMealIndex}
             />
             <View style={styles.bottom}>
                 <View style={styles.buttons}>
                     <IconButton 
-                        onPress={() => {
-                            setIsNewMeal(true);
-                            setShowAddMeal(true);
-                        }}
+                        onPress={() => setShowAddMeal(true)}
                         icon="plus-circle"
                         color={'darkviolet'}
                         size={60}
@@ -71,18 +77,34 @@ const HomeScreen = () => {
                         icon="note-plus"
                         color={'darkviolet'}
                         size={60}
+                        onPress={() => setShowAddNote(true)}
                         />
                 </View>
                 { showAddMeal && 
                     <AddMealComponent 
-                        isNewMeal={isNewMeal}
+                        meal={meal}
+                        setMeal={setMeal}
                         meals={meals}
                         setMeals={setMeals} 
                         setShowAddMeal={setShowAddMeal}
+                    />}
+                { showUpdateMeal && 
+                    <UpdateMealComponent 
+                        setMeals={setMeals}
+                        meals={meals}
+                        setShowUpdateMeal={setShowUpdateMeal}
+                        updateMealIndex={updateMealIndex}
                         meal={meal}
                         setMeal={setMeal}
+                    />
+                }
+                { showAddNote && 
+                    <AddNoteComponent 
+                        note={note}
+                        setNote={setNote}
+                        setShowAddNote={setShowAddNote}
                     />}
-                <BottomBarComponent />
+                <BottomBarComponent meals={meals}/>
             </View>
         </View>
     );

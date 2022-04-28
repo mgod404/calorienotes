@@ -2,8 +2,21 @@ import React, { useState } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Appbar, Text, IconButton } from 'react-native-paper';
 
+import { Meal } from '../screens/homescreen';
+interface Props {
+    meals: Meal[]
+}
+const BottomBarComponent: React.FC<Props> = ({meals}) => {
 
-const BottomBarComponent = () => {
+    const countTotalMacro = (field:string) => {
+        let total = 0;
+        meals && meals.forEach(element => total += (Number(element[field as keyof Meal]) * element.weight/100) );
+        return total
+    };
+    const countTotalCalories = meals.reduce((total, meal) => {
+            return total + (meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
+        }, 0);
+
     return(
         <Appbar style={styles.barView}>
             <View style={styles.totalView}>
@@ -17,7 +30,7 @@ const BottomBarComponent = () => {
                     Carbs
                 </Text>
                 <Text style={styles.centerText}>
-                    80
+                    {countTotalMacro('carbs')}
                 </Text>
             </View>
             <View style={styles.totalView}>
@@ -25,7 +38,7 @@ const BottomBarComponent = () => {
                     Fats
                 </Text>
                 <Text style={styles.centerText}>
-                    80
+                    {countTotalMacro('fat')}
                 </Text>
             </View>
             <View style={styles.totalView}>
@@ -33,7 +46,7 @@ const BottomBarComponent = () => {
                     Proteins
                 </Text>
                 <Text style={styles.centerText}>
-                    80
+                    {countTotalMacro('protein')}
                 </Text>
             </View>
             <View style={styles.totalView}>
@@ -41,7 +54,7 @@ const BottomBarComponent = () => {
                     Total Calories
                 </Text>
                 <Text style={styles.centerText}>
-                    80
+                    {countTotalCalories}
                 </Text>
             </View>
         </Appbar>

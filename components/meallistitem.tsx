@@ -7,15 +7,15 @@ import { Meal } from '../screens/homescreen'
 interface Props {
     meals: Meal[],
     setMeals: React.Dispatch<React.SetStateAction<Meal[]>>,
-    setShowAddMeal: React.Dispatch<React.SetStateAction<boolean>>,
-    setIsNewMeal: React.Dispatch<React.SetStateAction<boolean>>
+    setMeal: React.Dispatch<React.SetStateAction<Meal>>,
+    setShowUpdateMeal:  React.Dispatch<React.SetStateAction<boolean>>,
+    setUpdateMealIndex: React.Dispatch<React.SetStateAction<number | undefined>>,
 }
 
-const MealListItemComponent:React.FC<Props> = ({meals, setMeals, setShowAddMeal, setIsNewMeal}) => {
+const MealListItemComponent:React.FC<Props> = ({meals, setMeals, setMeal, setShowUpdateMeal, setUpdateMealIndex}) => {
 
-    const countCalories = (carbs:number, fat:number, protein:number) => {
-        const calories:number = carbs * 4 + fat * 9 + protein * 4;
-        return calories
+    const countCalories = (weight:number, carbs:number, fat:number, protein:number) => {
+        return (weight / 100 * (carbs * 4 + fat * 9 + protein * 4))
     }
 
     const removeMealAlert = (indexPassed: number, mealName: string) => {
@@ -48,13 +48,20 @@ const MealListItemComponent:React.FC<Props> = ({meals, setMeals, setShowAddMeal,
 
             {meals.map((meal, index) => (
                 <TouchableOpacity key={index} onPress={() => {
-                    setIsNewMeal(false);
-                    setShowAddMeal(true);
+                    setShowUpdateMeal(true);
+                    setMeal({
+                        name: meal.name,
+                        weight: meal.weight,
+                        carbs: meal.carbs,
+                        fat: meal.fat,
+                        protein: meal.protein
+                    });
+                    setUpdateMealIndex(index);
                 }}>
                     <DataTable.Row>
                         <DataTable.Cell>{meal.name}</DataTable.Cell>
                         <DataTable.Cell numeric>{meal.protein * meal.weight/100}</DataTable.Cell>
-                        <DataTable.Cell numeric>{countCalories(meal.carbs,meal.fat,meal.protein)}</DataTable.Cell>
+                        <DataTable.Cell numeric>{countCalories(meal.weight,meal.carbs,meal.fat,meal.protein)}</DataTable.Cell>
                         <DataTable.Cell numeric>
                             <IconButton 
                                 icon='delete-outline'
