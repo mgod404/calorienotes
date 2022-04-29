@@ -10,7 +10,7 @@ export interface Props {
 }
 
 const AddNoteComponent: React.FC<Props> = ({note, setNote, setShowAddNote}) => {
-    const [editedNote, setEditedNote] = useState('');
+    const [editedNote, setEditedNote] = useState(note);
 
     return (
         <Modal transparent visible={true}>
@@ -21,13 +21,17 @@ const AddNoteComponent: React.FC<Props> = ({note, setNote, setShowAddNote}) => {
                             multiline
                             placeholder="Write your note for today here."
                             value={editedNote}
-                            onChange={(input) => setEditedNote(String(input))}
+                            onChangeText={setEditedNote}
                         />
                     </View>
                     <View style={styles.buttons}>
                         <IconButton 
                             icon='check'
                             color='darkviolet'
+                            onPress={() => {
+                                setNote(editedNote);
+                                setShowAddNote(false);
+                            }}
                         />
                         <IconButton 
                             icon='close'

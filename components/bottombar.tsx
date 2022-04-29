@@ -4,14 +4,17 @@ import { Appbar, Text, IconButton } from 'react-native-paper';
 
 import { Meal } from '../screens/homescreen';
 interface Props {
-    meals: Meal[]
+    meals: Meal[],
+    setShowSettings: React.Dispatch<React.SetStateAction<boolean>>,
+    targetCalories: Number,
+    targetProtein: Number
 }
-const BottomBarComponent: React.FC<Props> = ({meals}) => {
+const BottomBarComponent: React.FC<Props> = ({meals, setShowSettings, targetCalories, targetProtein}) => {
 
     const countTotalMacro = (field:string) => {
         let total = 0;
         meals && meals.forEach(element => total += (Number(element[field as keyof Meal]) * element.weight/100) );
-        return total
+        return total.toFixed()
     };
     const countTotalCalories = meals.reduce((total, meal) => {
             return total + (meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
@@ -23,38 +26,39 @@ const BottomBarComponent: React.FC<Props> = ({meals}) => {
                 <IconButton 
                     icon='cog-outline'
                     color='darkviolet'
+                    onPress={() => setShowSettings(true)}
                 />
             </View>
             <View style={styles.totalView}>
                 <Text>
                     Carbs
                 </Text>
-                <Text style={styles.centerText}>
+                <Text>
                     {countTotalMacro('carbs')}
                 </Text>
             </View>
             <View style={styles.totalView}>
                 <Text>
-                    Fats
+                    Fat
                 </Text>
-                <Text style={styles.centerText}>
+                <Text>
                     {countTotalMacro('fat')}
                 </Text>
             </View>
             <View style={styles.totalView}>
-                <Text>
-                    Proteins
+                <Text style={Number(countTotalMacro('protein')) < targetCalories ? styles.redFont : styles.greenFont}>
+                    Protein
                 </Text>
-                <Text style={styles.centerText}>
-                    {countTotalMacro('protein')}
+                <Text style={Number(countTotalMacro('protein')) < targetCalories ? styles.redFont : styles.greenFont}>
+                    {countTotalMacro('protein')} / {targetProtein}
                 </Text>
             </View>
             <View style={styles.totalView}>
-                <Text>
+                <Text style={countTotalCalories > targetCalories ? styles.redFont : styles.greenFont}>
                     Total Calories
                 </Text>
-                <Text style={styles.centerText}>
-                    {countTotalCalories}
+                <Text style={countTotalCalories > targetCalories ? styles.redFont : styles.greenFont}>
+                    {countTotalCalories} / {targetCalories}
                 </Text>
             </View>
         </Appbar>
@@ -72,9 +76,12 @@ const styles = StyleSheet.create({
     totalView: {
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
-    centerText: {
-        textAlign: 'center'
+    redFont: {
+        color: 'red'
+    },
+    greenFont: {
+        color: 'green'
     }
 })
