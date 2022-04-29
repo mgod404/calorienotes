@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, StyleSheet, Modal } from 'react-native'
+import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { IconButton, Text } from 'react-native-paper';
 
 import DatePickerComponent from '../components/datepicker'
@@ -8,6 +8,7 @@ import BottomBarComponent  from '../components/bottombar'
 import AddMealComponent from '../components/addmeal';
 import UpdateMealComponent from '../components/updatemeal';
 import AddNoteComponent from '../components/addnote';
+import SettingsComponent from '../components/settings';
 
 
 export interface Meal {
@@ -52,6 +53,21 @@ const HomeScreen = () => {
     const [note, setNote] = useState('');
     const [showAddNote, setShowAddNote] = useState(false);
 
+    const [showSettings, setShowSettings] = useState(false);
+
+    const [targetCalories, setTargetCalories] = useState(2000);
+    const [targetProtein, setTargetProtein] = useState(100);
+
+    const [firstRender, setFirstRender] = useState(true);
+    useEffect(() => {
+        if(firstRender){
+            setFirstRender(false);
+            return
+        }
+        console.log('UseEffect Triggered. It would update notes for current day');
+    },[meals, note]);
+    useEffect(() => {console.log('UseEffect,it would retrieve data when date changed')},[date]);
+
     return (
         <View style={styles.container}>
             <DatePickerComponent 
@@ -65,6 +81,10 @@ const HomeScreen = () => {
                 setShowUpdateMeal={setShowUpdateMeal}
                 setUpdateMealIndex={setUpdateMealIndex}
             />
+            <TouchableOpacity onPress={() => setShowAddNote(true)}>
+                <Text style={styles.noteTitle}>{note? 'Note' : ''}</Text>
+                <Text style={{marginHorizontal:18}}>{note}</Text>
+            </TouchableOpacity>
             <View style={styles.bottom}>
                 <View style={styles.buttons}>
                     <IconButton 
@@ -87,7 +107,7 @@ const HomeScreen = () => {
                         meals={meals}
                         setMeals={setMeals} 
                         setShowAddMeal={setShowAddMeal}
-                    />}
+                    /> }
                 { showUpdateMeal && 
                     <UpdateMealComponent 
                         setMeals={setMeals}
@@ -96,15 +116,29 @@ const HomeScreen = () => {
                         updateMealIndex={updateMealIndex}
                         meal={meal}
                         setMeal={setMeal}
-                    />
-                }
+                    /> }
                 { showAddNote && 
                     <AddNoteComponent 
                         note={note}
                         setNote={setNote}
                         setShowAddNote={setShowAddNote}
-                    />}
-                <BottomBarComponent meals={meals}/>
+                    />
+                }
+                { showSettings &&
+                    <SettingsComponent 
+                        setShowSettings={setShowSettings}
+                        setTargetCalories={setTargetCalories}
+                        setTargetProtein={setTargetProtein}
+                        targetCalories={targetCalories}
+                        targetProtein={targetProtein}
+                    />
+                }
+                    <BottomBarComponent 
+                        meals={meals}
+                        setShowSettings={setShowSettings}
+                        targetCalories={targetCalories}
+                        targetProtein={targetProtein}
+                    />
             </View>
         </View>
     );
@@ -125,5 +159,10 @@ const styles = StyleSheet.create({
     buttons: {
         display: 'flex',
         flexDirection: 'row-reverse',
+    },
+    noteTitle: {
+        color:'darkviolet', 
+        fontWeight:'bold', 
+        textAlign:'center'
     }
 });
