@@ -2,14 +2,23 @@ import React, { useState } from 'react'
 import { View, StyleSheet, Modal, TextInput } from 'react-native'
 import { IconButton } from 'react-native-paper';
 
+import { Meal } from '../screens/homescreen';
+
 
 export interface Props {
     note: string,
     setNote: React.Dispatch<React.SetStateAction<string>>,
-    setShowAddNote: React.Dispatch<React.SetStateAction<boolean>>
+    setShowAddNote: React.Dispatch<React.SetStateAction<boolean>>,
+    updateDiary: (passedMeals?: Meal[], passedNote?: string) => void,
 }
 
-const AddNoteComponent: React.FC<Props> = ({note, setNote, setShowAddNote}) => {
+const AddNoteComponent: React.FC<Props> = (
+    {
+        note, 
+        setNote, 
+        setShowAddNote,
+        updateDiary
+    }) => {
     const [editedNote, setEditedNote] = useState(note);
 
     return (
@@ -29,7 +38,8 @@ const AddNoteComponent: React.FC<Props> = ({note, setNote, setShowAddNote}) => {
                             icon='check'
                             color='darkviolet'
                             onPress={() => {
-                                setNote(editedNote);
+                                console.log(`note updated and passed to update ${editedNote}`);
+                                updateDiary(undefined,editedNote);
                                 setShowAddNote(false);
                             }}
                         />

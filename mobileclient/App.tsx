@@ -1,11 +1,13 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { DefaultTheme,Provider as PaperProvider } from 'react-native-paper';
+import { DefaultTheme,Provider as PaperProvider } from 'react-native-paper'
+
+import { JwtTokenContextProvider}  from './contexts/jwttoken'
 
 import HomeScreen from './screens/homescreen'
 import LoginScreen from './screens/loginscreen'
-import TestScreen from './screens/testscreen';
+import TestScreen from './screens/testscreen'
 
 
 
@@ -34,6 +36,7 @@ const Stack = createNativeStackNavigator();
 const App = () => {
 
   return (
+    <JwtTokenContextProvider>
     <PaperProvider theme={theme}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login">
@@ -43,6 +46,7 @@ const App = () => {
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
+    </JwtTokenContextProvider>
   )};
 
 export default App;

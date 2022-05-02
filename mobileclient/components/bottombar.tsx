@@ -14,10 +14,10 @@ const BottomBarComponent: React.FC<Props> = ({meals, setShowSettings, targetCalo
     const countTotalMacro = (field:string) => {
         let total = 0;
         meals && meals.forEach(element => total += (Number(element[field as keyof Meal]) * element.weight/100) );
-        return total.toFixed()
+        return Math.round(total)
     };
     const countTotalCalories = meals.reduce((total, meal) => {
-            return total + (meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
+            return Math.round(total + (meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4)))
         }, 0);
 
     return(

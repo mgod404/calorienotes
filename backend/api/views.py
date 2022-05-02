@@ -37,7 +37,7 @@ class RetrieveUpdateNotes(generics.RetrieveUpdateAPIView):
 class CreateNotes(generics.CreateAPIView):
     serializer_class = NoteSerializer
     queryset = Note.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
 
     def perform_create(self, serializer):
         #This code is to ensure the users can only create notes for themselves

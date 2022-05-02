@@ -1,12 +1,36 @@
-import React, { useState } from 'react'
-import { StyleSheet, TextInput, View, SafeAreaView, Text, Button } from 'react-native'
+import React, { useState, useContext } from 'react'
+import { StyleSheet, TextInput, View, Text, Button } from 'react-native'
+import { Switch } from 'react-native-paper';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import {JwtTokenContext} from '../contexts/jwttoken'
+
+type RootStackParamList = {
+    Home: undefined
+};
+
+interface IPdpPageProps {
+    navigation: NativeStackNavigationProp<RootStackParamList>
+}
 
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }: IPdpPageProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const signin = async () => {
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const [isSwitchOn, setIsSwitchOn] = useState(false);
+    const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
+
+    const jwt = useContext(JwtTokenContext);
+
+    if(jwt?.jwtRefreshToken && jwt?.jwtRefreshToken !== ''){
+        console.log(`Jwt refresh token already found ${jwt?.jwtRefreshToken}`);
+        navigation.navigate('Home');
+    }
+
+    const login = async () => {
         const response = await fetch(`http://192.168.0.242:8000/api/token/`, {
             method: 'POST',
             headers: {
@@ -19,14 +43,20 @@ const LoginScreen = () => {
         });
         if(response.status == 200){
             const data = await response.json();
-            console.log(data);
-        }
-
-    }
+            jwt?.setJwtAccessToken(data.access);
+            navigation.navigate('Home');
+            if(!isSwitchOn){
+                return
+            }
+            jwt?.setJwtRefreshToken(data.refresh);
+        } else {
+            setErrorMessage('Wrong email or password');
+        };
+    };
 
     return(
         <View style={styles.loginWrapper}>
-            <Text>{email} {password}</Text>
+            <Text>JwtAccessToken: {jwt?.jwtAccessToken}  JwtRefreshToken:{jwt?.jwtRefreshToken}</Text>
             <TextInput
                 style={styles.input}
                 onChangeText={(input) => setEmail(input)}
@@ -40,14 +70,29 @@ const LoginScreen = () => {
                 value={password}
                 placeholder="Password"
             />
+
+            <View style={{flexDirection:'row'}}>
+            <Switch 
+                color='darkviolet'
+                value={isSwitchOn}
+                onValueChange={onToggleSwitch}
+                />
+            <Text style={{alignSelf:'center'}}>Remember me</Text>
+            </View>
+
+            {errorMessage ?
+            <View style={styles.errorView}>
+            <Text style={{color:'lightgray'}}>{errorMessage}</Text>
+            </View>: <></>}
+
             <View style={styles.buttons}>
                 <Button 
-                    onPress={() => signin()}
+                    onPress={() => login()}
                     title='Login'
                     color='darkviolet'/>
                 <Button 
                     onPress={() => console.log('Bttn pressed')}
-                    title='Signin'
+                    title='sign in'
                     color='darkviolet'/>
             </View>
         </View>
@@ -60,7 +105,7 @@ const styles = StyleSheet.create({
     loginWrapper: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     input: {
         height: 40,
@@ -76,5 +121,10 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
         marginTop:20,
         paddingRight:10,
+    },
+    errorView: {
+        backgroundColor:'rgba(255, 57, 57, 0.8)', 
+        padding:5, 
+        borderRadius:5
     }
 })

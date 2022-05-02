@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { IconButton, Text } from 'react-native-paper';
+
+import { JwtTokenContext } from '../contexts/jwttoken';
 
 import DatePickerComponent from '../components/datepicker'
 import MealListItemComponent from '../components/meallistitem'
@@ -10,6 +13,19 @@ import UpdateMealComponent from '../components/updatemeal';
 import AddNoteComponent from '../components/addnote';
 import SettingsComponent from '../components/settings';
 
+type RootStackParamList = {
+    Login: undefined
+};
+
+interface NavigateProps {
+    navigation: NativeStackNavigationProp<RootStackParamList>;
+}
+
+interface NoteFetchData {
+    date: string,
+    meals: Meal[],
+    additional_note: string
+}
 
 export interface Meal {
     name: string,
@@ -19,9 +35,8 @@ export interface Meal {
     protein: number
 }
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }: NavigateProps) => {
     const [showAddMeal, setShowAddMeal] = useState(false);
-
     const [meal, setMeal] = React.useState<Meal>({
         name: '',
         weight: 0,
@@ -29,27 +44,12 @@ const HomeScreen = () => {
         fat: 0,
         protein: 0,
     });
-
     const [showUpdateMeal, setShowUpdateMeal] = useState(false);
     const [updateMealIndex, setUpdateMealIndex] = useState<number>();
 
     const [date, setDate] = useState<Date>(new Date());
-    const [meals, setMeals] = useState<Array<Meal>>([
-        {
-            name: 'French Fries',
-            weight: 200,
-            carbs: 50,
-            fat: 30,
-            protein: 10,
-        },
-        {
-            name: 'Hamburger',
-            weight: 500,
-            carbs: 30,
-            fat: 60,
-            protein: 40,
-        },
-    ]);
+
+    const [meals, setMeals] = useState<Array<Meal>>([]);
     const [note, setNote] = useState('');
     const [showAddNote, setShowAddNote] = useState(false);
 
@@ -58,15 +58,99 @@ const HomeScreen = () => {
     const [targetCalories, setTargetCalories] = useState(2000);
     const [targetProtein, setTargetProtein] = useState(100);
 
-    const [firstRender, setFirstRender] = useState(true);
-    useEffect(() => {
-        if(firstRender){
-            setFirstRender(false);
-            return
+    const createNotes = () => {
+        const [stringifyDate] = date.toISOString().split('T');
+        const bodyPost:NoteFetchData = {
+            date: stringifyDate,
+            meals: meals,
+            additional_note: note,
+        };
+        fetch(`http://192.168.0.242:8000/api/notes/create/`,{
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bodyPost),
+        })
+            .then(res => res.json())
+            .catch(e => console.log(e));
+    };
+    const getNotes = async () => {
+        try {
+            const response = await fetch(`http://192.168.0.242:8000/api/notes/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,{
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                },
+            });
+
+            if(response.status == 404){
+                return
+            }
+            if(response.status == 200){
+                console.log('Meals found, no need to create')
+                const data:NoteFetchData = await response.json();
+                setMeals(data.meals);
+                setNote(data.additional_note);
+            }
         }
-        console.log('UseEffect Triggered. It would update notes for current day');
-    },[meals, note]);
-    useEffect(() => {console.log('UseEffect,it would retrieve data when date changed')},[date]);
+        catch (e){
+            console.error(e);
+        }
+    }
+
+    const update = async (inputMeals: Meal[], inputNote:string) => {
+        const [stringifyDate] = date.toISOString().split('T');
+        const bodyPost:NoteFetchData = {
+            date: stringifyDate,
+            meals: inputMeals,
+            additional_note: inputNote,
+        };
+        try{
+            const response = await fetch(`http://192.168.0.242:8000/api/notes/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}/`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bodyPost)
+            });
+            if(response.status == 200){
+                console.log('Everything went smoothly, it was updated');
+            };
+            if(response.status == 404){
+                console.log('meals not found. Creating them');
+                createNotes();
+            }
+            console.log(response.status)
+        }
+        catch (e){
+            console.error(e);
+        }
+
+    }
+
+
+    useEffect(() => {
+        console.log(`UseEffect,it would retrieve data when date changed`);
+        setMeals([]);
+        setNote('');
+        getNotes();
+    },[date]);
+
+    const jwt = useContext(JwtTokenContext);
+    const logout = () => {
+        jwt?.setJwtRefreshToken('');
+        navigation.navigate('Login');
+    }
+
+    const updateDiary = (passedMeals = meals, passedNote = note) => {
+        setNote(passedNote);
+        setMeals(passedMeals);
+        update(passedMeals, passedNote);
+    }
+
 
     return (
         <View style={styles.container}>
@@ -80,6 +164,7 @@ const HomeScreen = () => {
                 setMeal={setMeal}
                 setShowUpdateMeal={setShowUpdateMeal}
                 setUpdateMealIndex={setUpdateMealIndex}
+                updateDiary={updateDiary}
             />
             <TouchableOpacity onPress={() => setShowAddNote(true)}>
                 <Text style={styles.noteTitle}>{note? 'Note' : ''}</Text>
@@ -107,6 +192,7 @@ const HomeScreen = () => {
                         meals={meals}
                         setMeals={setMeals} 
                         setShowAddMeal={setShowAddMeal}
+                        updateDiary={updateDiary}
                     /> }
                 { showUpdateMeal && 
                     <UpdateMealComponent 
@@ -116,12 +202,14 @@ const HomeScreen = () => {
                         updateMealIndex={updateMealIndex}
                         meal={meal}
                         setMeal={setMeal}
+                        updateDiary={updateDiary}
                     /> }
                 { showAddNote && 
                     <AddNoteComponent 
                         note={note}
                         setNote={setNote}
                         setShowAddNote={setShowAddNote}
+                        updateDiary={updateDiary}
                     />
                 }
                 { showSettings &&
@@ -131,6 +219,7 @@ const HomeScreen = () => {
                         setTargetProtein={setTargetProtein}
                         targetCalories={targetCalories}
                         targetProtein={targetProtein}
+                        logout={logout}
                     />
                 }
                     <BottomBarComponent 

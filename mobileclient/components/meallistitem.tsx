@@ -10,9 +10,18 @@ interface Props {
     setMeal: React.Dispatch<React.SetStateAction<Meal>>,
     setShowUpdateMeal:  React.Dispatch<React.SetStateAction<boolean>>,
     setUpdateMealIndex: React.Dispatch<React.SetStateAction<number | undefined>>,
+    updateDiary: (passedMeals?: Meal[], passedNote?: string) => void,
 }
 
-const MealListItemComponent:React.FC<Props> = ({meals, setMeals, setMeal, setShowUpdateMeal, setUpdateMealIndex}) => {
+const MealListItemComponent:React.FC<Props> = (
+    {
+        meals, 
+        setMeals, 
+        setMeal, 
+        setShowUpdateMeal, 
+        setUpdateMealIndex, 
+        updateDiary
+    }) => {
 
     const countCalories = (weight:number, carbs:number, fat:number, protein:number) => {
         return (weight / 100 * (carbs * 4 + fat * 9 + protein * 4))
@@ -34,7 +43,7 @@ const MealListItemComponent:React.FC<Props> = ({meals, setMeals, setMeal, setSho
 
     const removeMeal = (indexPassed: number) => {
         let newMeals:Meal[] = meals.filter((element,index) => index != indexPassed);
-        setMeals(newMeals);
+        updateDiary(newMeals);
     }
 
     return(
@@ -61,7 +70,7 @@ const MealListItemComponent:React.FC<Props> = ({meals, setMeals, setMeal, setSho
                     <DataTable.Row>
                         <DataTable.Cell>{meal.name}</DataTable.Cell>
                         <DataTable.Cell numeric>{meal.protein * meal.weight/100}</DataTable.Cell>
-                        <DataTable.Cell numeric>{countCalories(meal.weight,meal.carbs,meal.fat,meal.protein)}</DataTable.Cell>
+                        <DataTable.Cell numeric>{countCalories(meal.weight,meal.carbs,meal.fat,meal.protein).toFixed()}</DataTable.Cell>
                         <DataTable.Cell numeric>
                             <IconButton 
                                 icon='delete-outline'

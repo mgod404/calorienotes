@@ -15,9 +15,19 @@ interface Props {
     updateMealIndex: number | undefined,
     meal: Meal,
     setMeal: React.Dispatch<React.SetStateAction<Meal>>,
+    updateDiary: (passedMeals?: Meal[], passedNote?: string) => void,
 }
 
-const UpdateMealComponent: React.FC<Props> = ({ setMeals, meals, setShowUpdateMeal, updateMealIndex, meal, setMeal}) => {
+const UpdateMealComponent: React.FC<Props> = (
+    { 
+        setMeals, 
+        meals, 
+        setShowUpdateMeal, 
+        updateMealIndex, 
+        meal, 
+        setMeal,
+        updateDiary,
+    }) => {
 
     const updateMeals = (passedIndex:number | undefined, updatedMeal:Meal) => {
         if(passedIndex === undefined){
@@ -26,7 +36,7 @@ const UpdateMealComponent: React.FC<Props> = ({ setMeals, meals, setShowUpdateMe
         }
         let newMeals = meals.filter((element,index) => index != passedIndex);
         newMeals = [...newMeals, updatedMeal];
-        setMeals(newMeals);
+        updateDiary(newMeals);
     }
 
     const countCalories = () => {

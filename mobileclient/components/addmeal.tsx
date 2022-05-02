@@ -13,18 +13,27 @@ interface Props {
     meals: Meal[],
     meal: Meal,
     setMeal: React.Dispatch<React.SetStateAction<Meal>>,
+    updateDiary: (passedMeals?: Meal[], passedNote?: string) => void,
 }
 
-const AddMealComponent: React.FC<Props> = ({setShowAddMeal, setMeals, meals, meal, setMeal}) => {
+const AddMealComponent: React.FC<Props> = (
+    {
+        setShowAddMeal, 
+        setMeals, 
+        meals, 
+        meal, 
+        setMeal, 
+        updateDiary
+    }) => {
     const [showBarCodeScanner, setShowBarCodeScanner] = useState<boolean>(false);
 
 
     const updateMeals = () => {
         let newMeals:Meal[] = [...meals, meal];
-        setMeals(newMeals);
+        updateDiary(newMeals);
     }
     const countCalories = () => {
-        return (meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
+        return Math.round(meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
     }
 
     return(
@@ -120,7 +129,8 @@ const AddMealComponent: React.FC<Props> = ({setShowAddMeal, setMeals, meals, mea
                     <Modal>
                         <BarCodeScannerComponent 
                             setMeal={setMeal}
-                            setShowBarCodeScanner={setShowBarCodeScanner}/>
+                            setShowBarCodeScanner={setShowBarCodeScanner}
+                            />
                     </Modal>}
         </Modal>
     )

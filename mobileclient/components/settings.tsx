@@ -1,16 +1,17 @@
 import React, { useState } from 'react'
 import { View, StyleSheet, Modal, Text, TextInput} from 'react-native'
-import { IconButton } from 'react-native-paper';
+import { IconButton, Button } from 'react-native-paper';
 
 interface Props {
     setShowSettings: React.Dispatch<React.SetStateAction<boolean>>,
     targetCalories: number,
     setTargetCalories: React.Dispatch<React.SetStateAction<number>>,
     targetProtein: number,
-    setTargetProtein: React.Dispatch<React.SetStateAction<number>>
+    setTargetProtein: React.Dispatch<React.SetStateAction<number>>,
+    logout: () => void
 }
 
-const SettingsComponent: React.FC<Props> = ({setShowSettings ,targetCalories, setTargetCalories, targetProtein, setTargetProtein}) => {
+const SettingsComponent: React.FC<Props> = ({setShowSettings ,targetCalories, setTargetCalories, targetProtein, setTargetProtein, logout}) => {
 
     return(
         <Modal transparent visible={true}>
@@ -27,7 +28,7 @@ const SettingsComponent: React.FC<Props> = ({setShowSettings ,targetCalories, se
                         </View>
                     </View>
                     <View style={styles.setting}>
-                        <Text>Set calorie goal</Text>
+                        <Text>Set protein goal</Text>
                         <View style={styles.input}>
                             <TextInput 
                                 keyboardType='numeric'
@@ -36,11 +37,17 @@ const SettingsComponent: React.FC<Props> = ({setShowSettings ,targetCalories, se
                             />
                         </View>
                     </View>
-                    <IconButton 
-                        icon='check'
-                        color='darkviolet'
-                        onPress={() => setShowSettings(false)}
-                    />
+                    <View style={styles.buttons}>
+                        <IconButton 
+                            icon='check'
+                            color='darkviolet'
+                            onPress={() => setShowSettings(false)}
+                        />
+                        <Button
+                            color='darkviolet'
+                            onPress={()=> logout()}
+                        >Logout</Button>
+                    </View>
                 </View>
             </View>
         </Modal>
