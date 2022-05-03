@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { IconButton, Text } from 'react-native-paper';
+import * as SecureStore from 'expo-secure-store'
 
 import { JwtTokenContext } from '../contexts/jwttoken';
 
@@ -58,7 +59,8 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
     const [targetCalories, setTargetCalories] = useState(2000);
     const [targetProtein, setTargetProtein] = useState(100);
 
-    const createNotes = () => {
+
+    const createDiary = () => {
         const [stringifyDate] = date.toISOString().split('T');
         const bodyPost:NoteFetchData = {
             date: stringifyDate,
@@ -76,7 +78,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
             .then(res => res.json())
             .catch(e => console.log(e));
     };
-    const getNotes = async () => {
+    const getDiary = async () => {
         try {
             const response = await fetch(`http://192.168.0.242:8000/api/notes/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,{
                 method: 'GET',
@@ -84,7 +86,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                     'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
                 },
             });
-
             if(response.status == 404){
                 return
             }
@@ -99,7 +100,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
             console.error(e);
         }
     }
-
     const update = async (inputMeals: Meal[], inputNote:string) => {
         const [stringifyDate] = date.toISOString().split('T');
         const bodyPost:NoteFetchData = {
@@ -121,27 +121,26 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
             };
             if(response.status == 404){
                 console.log('meals not found. Creating them');
-                createNotes();
+                createDiary();
             }
             console.log(response.status)
         }
         catch (e){
             console.error(e);
         }
-
     }
 
-
+    //When date changes, the content of app changes(meals, note)
     useEffect(() => {
-        console.log(`UseEffect,it would retrieve data when date changed`);
         setMeals([]);
         setNote('');
-        getNotes();
+        getDiary();
     },[date]);
 
     const jwt = useContext(JwtTokenContext);
     const logout = () => {
         jwt?.setJwtRefreshToken('');
+        SecureStore.deleteItemAsync('jwt_refresh_token');
         navigation.navigate('Login');
     }
 

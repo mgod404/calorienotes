@@ -1,7 +1,8 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { StyleSheet, TextInput, View, Text, Button } from 'react-native'
 import { Switch } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as SecureStore from 'expo-secure-store'
 
 import {JwtTokenContext} from '../contexts/jwttoken'
 
@@ -9,12 +10,16 @@ type RootStackParamList = {
     Home: undefined
 };
 
-interface IPdpPageProps {
+interface NavigationProps {
     navigation: NativeStackNavigationProp<RootStackParamList>
 }
 
+interface NewAccessTokenResponse {
+    access: string
+}
 
-const LoginScreen = ({ navigation }: IPdpPageProps) => {
+
+const LoginScreen = ({ navigation }: NavigationProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -25,38 +30,72 @@ const LoginScreen = ({ navigation }: IPdpPageProps) => {
 
     const jwt = useContext(JwtTokenContext);
 
-    if(jwt?.jwtRefreshToken && jwt?.jwtRefreshToken !== ''){
-        console.log(`Jwt refresh token already found ${jwt?.jwtRefreshToken}`);
-        navigation.navigate('Home');
+    const getNewAccessToken = async () => {
+        try{
+            const response = await fetch(`http://192.168.0.242:8000/api/token/refresh/`,{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: `{"refresh":"${jwt?.jwtRefreshToken}"}`
+            })
+            if(response.status === 200){
+                const data:NewAccessTokenResponse = await response.json();
+                jwt?.setJwtAccessToken(data.access);
+            }
+        }
+        catch (e){
+            console.error(e);
+        }
+    }
+    const checkForRefreshKeyInStorage = async () => {
+        console.log(`checking if there is any key in storage`);
+        const storageRefreshToken = await SecureStore.getItemAsync('jwt_refresh_token');
+        if(storageRefreshToken){
+            //REFRESH TOKEN SAVED AND FOUND, PROCEED 'REMEMBER ME' FUNC FROM HERE 
+            jwt?.setJwtRefreshToken(storageRefreshToken);
+            console.log(`Jwt refresh token already found ${jwt?.jwtRefreshToken}`);
+            await getNewAccessToken();
+            navigation.navigate('Home');
+        }
     }
 
+    useEffect(()=> {
+        checkForRefreshKeyInStorage();
+        getNewAccessToken();
+    },[]);
+
     const login = async () => {
-        const response = await fetch(`http://192.168.0.242:8000/api/token/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: email,
-                password: password
-            })
-        });
-        if(response.status == 200){
-            const data = await response.json();
-            jwt?.setJwtAccessToken(data.access);
-            navigation.navigate('Home');
-            if(!isSwitchOn){
-                return
-            }
-            jwt?.setJwtRefreshToken(data.refresh);
-        } else {
-            setErrorMessage('Wrong email or password');
-        };
+        try {
+            const response = await fetch(`http://192.168.0.242:8000/api/token/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: email,
+                    password: password
+                })
+            });
+            if(response.status == 200){
+                const data = await response.json();
+                jwt?.setJwtAccessToken(data.access);
+                navigation.navigate('Home');
+                if(isSwitchOn){
+                    jwt?.setJwtRefreshToken(data.refresh);
+                    SecureStore.setItemAsync('jwt_refresh_token', data.refresh);
+                }
+            } else {
+                setErrorMessage('Wrong email or password');
+            };
+        }
+        catch(e) {
+            e instanceof Error ? setErrorMessage(e.message): setErrorMessage(String(e))
+        }
     };
 
     return(
         <View style={styles.loginWrapper}>
-            <Text>JwtAccessToken: {jwt?.jwtAccessToken}  JwtRefreshToken:{jwt?.jwtRefreshToken}</Text>
             <TextInput
                 style={styles.input}
                 onChangeText={(input) => setEmail(input)}
