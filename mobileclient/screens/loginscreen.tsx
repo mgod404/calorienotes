@@ -25,23 +25,33 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
 
     const [errorMessage, setErrorMessage] = useState('');
 
-    const [isSwitchOn, setIsSwitchOn] = useState(false);
-    const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
+    const [rememberMe, setRememberMe] = useState(false);
+    const onToggleSwitch = () => setRememberMe(!rememberMe);
 
     const jwt = useContext(JwtTokenContext);
 
-    const getNewAccessToken = async () => {
+    const getNewAccessToken = async (refreshToken:string) => {
         try{
+            console.log('fetching new access token')
             const response = await fetch(`http://192.168.0.242:8000/api/token/refresh/`,{
                 method: 'POST',
                 headers:{
                     'Content-Type': 'application/json'
                 },
-                body: `{"refresh":"${jwt?.jwtRefreshToken}"}`
+                body: `{"refresh":"${refreshToken}"}`
             })
             if(response.status === 200){
                 const data:NewAccessTokenResponse = await response.json();
                 jwt?.setJwtAccessToken(data.access);
+                console.log('new Access Key obtained');
+            }if(response.status == 401){
+                jwt?.setJwtRefreshToken('');
+                await SecureStore.setItemAsync('jwt_refresh_token', '');
+                setErrorMessage('Token has expired. Please login again.');
+            }else{
+                jwt?.setJwtRefreshToken('');
+                await SecureStore.setItemAsync('jwt_refresh_token', '');
+                setErrorMessage('Unknown error occured. Please login again.');
             }
         }
         catch (e){
@@ -49,20 +59,18 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
         }
     }
     const checkForRefreshKeyInStorage = async () => {
-        console.log(`checking if there is any key in storage`);
         const storageRefreshToken = await SecureStore.getItemAsync('jwt_refresh_token');
         if(storageRefreshToken){
             //REFRESH TOKEN SAVED AND FOUND, PROCEED 'REMEMBER ME' FUNC FROM HERE 
-            jwt?.setJwtRefreshToken(storageRefreshToken);
-            console.log(`Jwt refresh token already found ${jwt?.jwtRefreshToken}`);
-            await getNewAccessToken();
+            setRememberMe(true);
+            console.log(`Jwt refresh token already found ${storageRefreshToken}`);
+            await getNewAccessToken(storageRefreshToken);
             navigation.navigate('Home');
         }
     }
 
     useEffect(()=> {
         checkForRefreshKeyInStorage();
-        getNewAccessToken();
     },[]);
 
     const login = async () => {
@@ -81,7 +89,7 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
                 const data = await response.json();
                 jwt?.setJwtAccessToken(data.access);
                 navigation.navigate('Home');
-                if(isSwitchOn){
+                if(rememberMe){
                     jwt?.setJwtRefreshToken(data.refresh);
                     SecureStore.setItemAsync('jwt_refresh_token', data.refresh);
                 }
@@ -113,7 +121,7 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
             <View style={{flexDirection:'row'}}>
             <Switch 
                 color='darkviolet'
-                value={isSwitchOn}
+                value={rememberMe}
                 onValueChange={onToggleSwitch}
                 />
             <Text style={{alignSelf:'center'}}>Remember me</Text>

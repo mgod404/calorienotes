@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, SafeAreaView, Platform, StatusBar  } from 'react-native'
 import { Button } from 'react-native-paper'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -11,32 +11,26 @@ interface Props {
 const DatePickerComponent: React.FC<Props> = (props) => {
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
-  
+
     const onChange = (event:any, selectedDate:Date | undefined) => {
-      const currentDate = selectedDate;
-      setShow(false);
-      if(currentDate){
+    const currentDate = selectedDate;
+    if(currentDate){
         props.setDate(currentDate);
-      }
     };
-  
+    setShow(false);
+    };
+
     const showMode = (currentMode:string) => {
-      setShow(true);
-      setMode(currentMode);
+        setShow(true);
+        setMode(currentMode);
     };
-  
+
     const showDatepicker = () => {
-      showMode('date');
+        showMode('date');
     };
-  
-    const showTimepicker = () => {
-      showMode('time');
-    };
-
-
 
     const changeDay = (date: Date, days: number): Date => {
-        let newDate: Date = new Date(Date.now());
+        let newDate: Date = new Date(date);
         newDate.setDate(date.getDate() + days);
         return newDate;
     };

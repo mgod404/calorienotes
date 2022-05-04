@@ -38,13 +38,17 @@ const BarCodeScannerComponent: React.FC<Props> = ({setShowBarCodeScanner, setMea
                 return
             }
             const nutrients = data.product.nutriments;
-            setMeal({
-                name: data.product.product_name,
-                weight: 0,
-                carbs: nutrients.carbohydrates_100g,
-                fat: nutrients.fat_100g,
-                protein: nutrients.proteins_100g,
-            });
+            if(data.product.product_name && nutrients.carbohydrates_100g && nutrients.fat_100g && nutrients.proteins_100g){
+                setMeal({
+                    name: data.product.product_name,
+                    weight: 0,
+                    carbs: nutrients.carbohydrates_100g,
+                    fat: nutrients.fat_100g,
+                    protein: nutrients.proteins_100g,
+                });
+            } else {
+                alert(`Product has been found, but lacked macronutrient data`);
+            }
         }
         catch (error) {
             alert(error);

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { View, StyleSheet, Modal, TextInput } from 'react-native'
 import { Button, IconButton, Text, Divider } from 'react-native-paper';
+import * as SecureStore from 'expo-secure-store'
 
 import BarCodeScannerComponent from './barcodescanner';
+import MealSearchBarComponent from './mealsearchbar';
 
 import { Meal } from '../screens/homescreen';
 
@@ -35,6 +37,20 @@ const AddMealComponent: React.FC<Props> = (
     const countCalories = () => {
         return Math.round(meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
     }
+    const addMealToLocalStorage = async () => {
+        const localStorageMeals = await SecureStore.getItemAsync('meals');
+        console.log(localStorageMeals);
+        if(!localStorageMeals){
+            SecureStore.setItemAsync('meals', '[]')
+            return
+        }
+        const localStorageMealsParsed:Meal[] = JSON.parse(localStorageMeals);
+        const mealInStorage = localStorageMealsParsed.filter(element => element.name == meal.name);
+        if(mealInStorage[0]){
+            return
+        }
+        SecureStore.setItemAsync('meals', JSON.stringify([...localStorageMealsParsed, meal]));
+    }
 
     return(
         <Modal transparent visible={true}>
@@ -43,21 +59,30 @@ const AddMealComponent: React.FC<Props> = (
                     <IconButton 
                         style={{alignSelf:'flex-end'}}
                         icon='window-close' 
-                        onPress={() => setShowAddMeal(false)}
+                        onPress={() => {
+                            setMeal({
+                                name: '',
+                                weight: 0,
+                                carbs: 0,
+                                fat: 0,
+                                protein: 0,
+                            });
+                            setShowAddMeal(false);
+                        }}
                     />
+
                         <View style={{display:'flex', flexDirection: 'row',}}>
-                            <TextInput
-                                style={styles.nameInput}
-                                onChangeText={(input) => setMeal({...meal, name: input})}
-                                value={meal.name}
-                                placeholder='Meal Name'
+                            <MealSearchBarComponent 
+                                meal={meal}
+                                setMeal={setMeal}
                             />
                         </View>
+
                         <View style={{alignSelf:'stretch', flexDirection: 'row',justifyContent:'space-between'}}>
                         <Text style={styles.inputDescription}>Weight(g)</Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={(input) => setMeal({...meal, weight: Number(input)})}
+                            onChangeText={(input) => setMeal({...meal, weight: +input})}
                             value={String(meal.weight)}
                             placeholder='Weight (g)'
                             keyboardType='numeric'
@@ -67,7 +92,7 @@ const AddMealComponent: React.FC<Props> = (
                         <Text style={styles.inputDescription}>Carbs(g per 100g)</Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={(input) => setMeal({...meal, carbs: Number(input)})}
+                            onChangeText={(input) => setMeal({...meal, carbs: +input})}
                             value={String(meal.carbs)}
                             placeholder='Carbs (g per 100g)'
                             keyboardType='numeric'
@@ -77,7 +102,7 @@ const AddMealComponent: React.FC<Props> = (
                         <Text style={styles.inputDescription}>Fat(g per 100g)</Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={(input) => setMeal({...meal, fat: Number(input)})}
+                            onChangeText={(input) => setMeal({...meal, fat: +input})}
                             value={String(meal.fat)}
                             placeholder='Fat (g per 100g)'
                             keyboardType='numeric'
@@ -87,7 +112,7 @@ const AddMealComponent: React.FC<Props> = (
                         <Text style={styles.inputDescription}>Protein(g per 100g)</Text>
                         <TextInput
                             style={styles.input}
-                            onChangeText={(input) => setMeal({...meal, protein: Number(input)})}
+                            onChangeText={(input) => setMeal({...meal, protein: +input})}
                             value={String(meal.protein)}
                             placeholder='Protein (g per 100g)'
                             keyboardType='numeric'
@@ -116,7 +141,19 @@ const AddMealComponent: React.FC<Props> = (
                                     alert(`Please, set value for food weight.`);
                                     return
                                 }
+                                if(meal.name.length === 0){
+                                    alert(`Please, fill in meal name in order to add meal`);
+                                    return
+                                }
+                                addMealToLocalStorage();
                                 updateMeals();
+                                setMeal({
+                                    name: '',
+                                    weight: 0,
+                                    carbs: 0,
+                                    fat: 0,
+                                    protein: 0,
+                                });
                                 setShowAddMeal(false);
                             }}
                             >

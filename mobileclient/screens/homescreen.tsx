@@ -107,6 +107,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
             meals: inputMeals,
             additional_note: inputNote,
         };
+        console.log(bodyPost);
         try{
             const response = await fetch(`http://192.168.0.242:8000/api/notes/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}/`, {
                 method: 'PUT',
@@ -116,7 +117,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                 },
                 body: JSON.stringify(bodyPost)
             });
-            if(response.status == 200){
+            if(response.status == 201){
                 console.log('Everything went smoothly, it was updated');
             };
             if(response.status == 404){
