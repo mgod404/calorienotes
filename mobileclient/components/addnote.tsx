@@ -7,7 +7,6 @@ import { Meal } from '../screens/homescreen';
 
 export interface Props {
     note: string,
-    setNote: React.Dispatch<React.SetStateAction<string>>,
     setShowAddNote: React.Dispatch<React.SetStateAction<boolean>>,
     updateDiary: (passedMeals?: Meal[], passedNote?: string) => void,
 }
@@ -15,7 +14,6 @@ export interface Props {
 const AddNoteComponent: React.FC<Props> = (
     {
         note, 
-        setNote, 
         setShowAddNote,
         updateDiary
     }) => {

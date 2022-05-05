@@ -2,16 +2,27 @@ import React, { useState } from 'react'
 import { View, StyleSheet, Modal, Text, TextInput} from 'react-native'
 import { IconButton, Button } from 'react-native-paper';
 
+import { Meal } from '../screens/homescreen';
+
 interface Props {
     setShowSettings: React.Dispatch<React.SetStateAction<boolean>>,
     targetCalories: number,
     setTargetCalories: React.Dispatch<React.SetStateAction<number>>,
     targetProtein: number,
     setTargetProtein: React.Dispatch<React.SetStateAction<number>>,
-    logout: () => void
+    logout: () => void,
+    updateDiary: (passedMeals?: Meal[], passedNote?: string, passedTargetCalories?: number, passedTargetProtein?: number) => void
 }
 
-const SettingsComponent: React.FC<Props> = ({setShowSettings ,targetCalories, setTargetCalories, targetProtein, setTargetProtein, logout}) => {
+const SettingsComponent: React.FC<Props> = ({
+    setShowSettings ,
+    targetCalories, 
+    setTargetCalories, 
+    targetProtein, 
+    setTargetProtein, 
+    logout,
+    updateDiary
+    }) => {
 
     return(
         <Modal transparent visible={true}>
@@ -23,7 +34,10 @@ const SettingsComponent: React.FC<Props> = ({setShowSettings ,targetCalories, se
                             <TextInput 
                                 keyboardType='numeric'
                                 value={targetCalories.toString()}
-                                onChangeText={(input) => setTargetCalories(Number(input))}
+                                onChangeText={(input) => {
+                                    setTargetCalories(+input);
+                                    updateDiary(undefined,undefined,+input);
+                                }}
                             />
                         </View>
                     </View>
@@ -33,7 +47,10 @@ const SettingsComponent: React.FC<Props> = ({setShowSettings ,targetCalories, se
                             <TextInput 
                                 keyboardType='numeric'
                                 value={targetProtein.toString()}
-                                onChangeText={(input) => setTargetProtein(Number(input))}
+                                onChangeText={(input) => {
+                                    setTargetProtein(+input);
+                                    updateDiary(undefined,undefined,undefined,+input);
+                                }}
                             />
                         </View>
                     </View>

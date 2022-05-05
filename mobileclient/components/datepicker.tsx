@@ -61,14 +61,14 @@ return (
             >
         </Button>
         {show && (
-          <DateTimePicker
+        <DateTimePicker
             testID="dateTimePicker"
             value={props.date}
             mode={'date'}
             is24Hour={true}
             onChange={onChange}
             textColor ={'darkviolet'}
-          />
+        />
         )}
 
     </SafeAreaView>

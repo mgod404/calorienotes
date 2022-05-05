@@ -17,15 +17,16 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from django.contrib import admin
 from django.urls import path
 
-from .views import CreateNotes, RegisterView, RetrieveUpdateNotes
+from .views import RegisterView, CreateNotes, RetrieveUpdateNotes, RetrieveUpdateDiary, CreateDiary
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('notes/create/', CreateNotes.as_view(), name='create-notes'),
-    path('notes/<int:year>/<int:month>/<int:day>/', RetrieveUpdateNotes.as_view(), name='retrieve-notes')
+    path('notes/<int:year>/<int:month>/<int:day>/', RetrieveUpdateNotes.as_view(), name='retrieve-notes'),
+    path('diary/create/', CreateDiary.as_view(), name='create-diary'),
+    path('diary/', RetrieveUpdateDiary.as_view(), name='retrieve-update-diary')
 ]

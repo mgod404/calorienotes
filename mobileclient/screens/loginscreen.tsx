@@ -7,7 +7,8 @@ import * as SecureStore from 'expo-secure-store'
 import {JwtTokenContext} from '../contexts/jwttoken'
 
 type RootStackParamList = {
-    Home: undefined
+    Home: undefined,
+    Signup: undefined
 };
 
 interface NavigationProps {
@@ -138,8 +139,8 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
                     title='Login'
                     color='darkviolet'/>
                 <Button 
-                    onPress={() => console.log('Bttn pressed')}
-                    title='sign in'
+                    onPress={() => navigation.navigate('Signup')}
+                    title='Sign up'
                     color='darkviolet'/>
             </View>
         </View>
@@ -156,13 +157,13 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        width: 200,
+        width: '80%',
         margin: 12,
         borderBottomWidth: 1,
         padding: 10,
     },
     buttons: {
-        width:170,
+        width:'70%',
         display:'flex',
         flexDirection:'row',
         justifyContent:'space-between',

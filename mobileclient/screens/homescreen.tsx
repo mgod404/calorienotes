@@ -22,18 +22,27 @@ interface NavigateProps {
     navigation: NativeStackNavigationProp<RootStackParamList>;
 }
 
-interface NoteFetchData {
-    date: string,
-    meals: Meal[],
-    additional_note: string
-}
-
 export interface Meal {
     name: string,
     weight: number,
     carbs: number,
     fat: number,
     protein: number
+}
+interface TargetMacros {
+    target_calories: number,
+    target_protein: number,
+}
+
+interface DiaryFetchData {
+    date: string,
+    meals: Meal[],
+    additional_note: string,
+    target_macros: TargetMacros
+}
+
+interface DiaryGetData {
+    diary: DiaryFetchData[]
 }
 
 const HomeScreen = ({ navigation }: NavigateProps) => {
@@ -59,80 +68,123 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
     const [targetCalories, setTargetCalories] = useState(2000);
     const [targetProtein, setTargetProtein] = useState(100);
 
-
-    const createDiary = () => {
-        const [stringifyDate] = date.toISOString().split('T');
-        const bodyPost:NoteFetchData = {
-            date: stringifyDate,
-            meals: meals,
-            additional_note: note,
-        };
-        fetch(`http://192.168.0.242:8000/api/notes/create/`,{
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bodyPost),
-        })
-            .then(res => res.json())
-            .catch(e => console.log(e));
-    };
-    const getDiary = async () => {
-        try {
-            const response = await fetch(`http://192.168.0.242:8000/api/notes/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,{
-                method: 'GET',
+    const [diaryData, setDiaryData] = useState<DiaryFetchData[]>();
+    const setInitialDiaryData = async () => {
+        try{
+            const response = await fetch(`http://192.168.0.242:8000/api/diary/`,{
+                method:'GET',
                 headers: {
                     'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
-                },
+                    'Content-Type': 'application/json'
+                }
             });
-            if(response.status == 404){
+            if(response.status == 200){
+                const data = await response.json();
+                const diary:DiaryFetchData[] = await data.diary;
+                setDiaryData(diary);
+                const isoDate = date.toISOString().split('T');
+                const filteredDiary = diary.filter(element => element.date === isoDate[0]);
+                if(filteredDiary[0]) {
+                    const DiaryToday = filteredDiary[0];
+                    setMeals(DiaryToday.meals);
+                    setNote(DiaryToday.additional_note);
+                    setTargetCalories(DiaryToday.target_macros.target_calories);
+                    setTargetProtein(DiaryToday.target_macros.target_protein);
+                }
                 return
             }
-            if(response.status == 200){
-                console.log('Meals found, no need to create')
-                const data:NoteFetchData = await response.json();
-                setMeals(data.meals);
-                setNote(data.additional_note);
-            }
+            if(response.status == 404){
+                const isoDate = date.toISOString().split('T');
+                const newDayData:DiaryFetchData = {
+                    date: isoDate[0],
+                    meals: [],
+                    additional_note: '',
+                    target_macros: {
+                        target_calories:targetCalories,
+                        target_protein:targetProtein,
+                    }
+                }
+                const newDayDataParsed:DiaryGetData = {diary: [newDayData]};
+                const createDiary = await fetch(`http://192.168.0.242:8000/api/diary/create/`, {
+                    method:'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newDayDataParsed)
+                });
+                if(createDiary.status == 201) {
+                    console.log('New Diary created');
+                    setDiaryData([newDayData]);
+                } else {
+                    console.log(`Couldn't create new diary ${createDiary.status}`);
+                }
+                return
+            } 
+            console.log(`Unknown problem, code status ${response.status} accesstoken ${jwt?.jwtAccessToken}`);
         }
-        catch (e){
+        catch (e) {
             console.error(e);
         }
     }
-    const update = async (inputMeals: Meal[], inputNote:string) => {
-        const [stringifyDate] = date.toISOString().split('T');
-        const bodyPost:NoteFetchData = {
-            date: stringifyDate,
-            meals: inputMeals,
-            additional_note: inputNote,
-        };
-        console.log(bodyPost);
-        try{
-            const response = await fetch(`http://192.168.0.242:8000/api/notes/${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}/`, {
-                method: 'PUT',
+
+    useEffect(() => {
+        setInitialDiaryData();
+    },[]);
+
+    const update = async (inputMeals: Meal[], inputNote:string, inputTargetCalories: number, inputTargetProtein: number) => {
+        console.log('Updating Diary');
+        if(diaryData){
+            const isoDate = date.toISOString().split('T');
+            const diaryWithoutUpdatedDay = diaryData.filter(element => element.date !== isoDate[0]);
+            const newDateData:DiaryFetchData = {
+                date: isoDate[0],
+                meals: inputMeals,
+                additional_note: inputNote,
+                target_macros: {
+                    target_protein: inputTargetProtein,
+                    target_calories: inputTargetCalories,
+                }
+            }
+            setDiaryData([...diaryWithoutUpdatedDay, newDateData]);
+            const updateBody = JSON.stringify({diary: diaryData});
+            const updateDiary = await fetch(`http://192.168.0.242:8000/api/diary/`, {
+                method:'PUT',
                 headers: {
                     'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(bodyPost)
+                body: updateBody
             });
-            if(response.status == 201){
-                console.log('Everything went smoothly, it was updated');
-            };
-            if(response.status == 404){
-                console.log('meals not found. Creating them');
-                createDiary();
-            }
-            console.log(response.status)
+            console.log(updateDiary.status);
+        } else {
+            console.log('Diary data not found');
         }
-        catch (e){
-            console.error(e);
+    }
+
+    const getDiary = async () => {
+        if(diaryData){
+            console.log('changin date');
+            const isoDate = date.toISOString().split('T');
+            const dayData = diaryData.filter(element => element.date === isoDate[0])
+            if(!dayData[0]){
+                return
+            }
+            console.log(dayData[0]);
+            setNote(dayData[0].additional_note);
+            setMeals(dayData[0].meals);
+            if(dayData[0].target_macros.target_calories){
+                setTargetCalories(dayData[0].target_macros.target_calories);
+            }
+            if(dayData[0].target_macros.target_protein){
+                setTargetProtein(dayData[0].target_macros.target_protein);
+            }
         }
     }
 
     //When date changes, the content of app changes(meals, note)
     useEffect(() => {
+        console.log(JSON.stringify(diaryData));
         setMeals([]);
         setNote('');
         getDiary();
@@ -145,10 +197,18 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
         navigation.navigate('Login');
     }
 
-    const updateDiary = (passedMeals = meals, passedNote = note) => {
+    const updateDiary = (
+        passedMeals = meals, 
+        passedNote = note, 
+        passedTargetCalories = targetCalories, 
+        passedTargetProtein = targetProtein
+    ) => {
+        console.log('fn ran');
         setNote(passedNote);
         setMeals(passedMeals);
-        update(passedMeals, passedNote);
+        setTargetCalories(passedTargetCalories);
+        setTargetProtein(passedTargetProtein);
+        update(passedMeals, passedNote, passedTargetCalories,passedTargetProtein);
     }
 
 
@@ -207,7 +267,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                 { showAddNote && 
                     <AddNoteComponent 
                         note={note}
-                        setNote={setNote}
                         setShowAddNote={setShowAddNote}
                         updateDiary={updateDiary}
                     />
@@ -220,6 +279,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                         targetCalories={targetCalories}
                         targetProtein={targetProtein}
                         logout={logout}
+                        updateDiary={updateDiary}
                     />
                 }
                     <BottomBarComponent 

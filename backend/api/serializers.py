@@ -3,8 +3,13 @@ from rest_framework.validators import UniqueForDateValidator
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import get_user_model
-from .models import Note
 
+from .models import Note, Diary
+
+class DiarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Diary
+        fields = ['diary']
 
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
