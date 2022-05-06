@@ -11,6 +11,11 @@ class DiarySerializer(serializers.ModelSerializer):
         model = Diary
         fields = ['diary']
 
+class MealslistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Diary
+        fields = ['mealslist']
+
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note

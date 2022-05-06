@@ -19,7 +19,7 @@ from rest_framework_simplejwt.views import (
 )
 from django.urls import path
 
-from .views import RegisterView, CreateNotes, RetrieveUpdateNotes, RetrieveUpdateDiary, CreateDiary
+from .views import RegisterView, CreateNotes, RetrieveUpdateMealslist, RetrieveUpdateNotes, RetrieveUpdateDiary, CreateDiary
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -28,5 +28,6 @@ urlpatterns = [
     path('notes/create/', CreateNotes.as_view(), name='create-notes'),
     path('notes/<int:year>/<int:month>/<int:day>/', RetrieveUpdateNotes.as_view(), name='retrieve-notes'),
     path('diary/create/', CreateDiary.as_view(), name='create-diary'),
-    path('diary/', RetrieveUpdateDiary.as_view(), name='retrieve-update-diary')
+    path('diary/', RetrieveUpdateDiary.as_view(), name='retrieve-update-diary'),
+    path('mealslist/', RetrieveUpdateMealslist.as_view(), name='retrieve-update-mealslist')
 ]

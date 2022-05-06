@@ -1,8 +1,10 @@
 // import React in our code
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { Searchbar, List } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
+
+import { JwtTokenContext } from '../contexts/jwttoken';
 
 import { Meal } from '../screens/homescreen';
 
@@ -13,28 +15,36 @@ interface Props {
 
 const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
     const [searchResultsVisible, setSearchResultsVisible] = useState(false);
-    const [searchedMeal, setSearchedMeal] = useState('');
+    const [fetchedMealsList, setFetchedMealsList] =useState<Meal[]>();
     const [foundMealsList, setFoundMealsList] = useState<Meal[]>();
+    const jwt = useContext(JwtTokenContext);
 
-    useEffect(()=> {
-        setMeal({...meal, name: searchedMeal})
-    },[searchedMeal]);
-    useEffect(()=> {
-        setSearchedMeal(meal.name);
-    },[meal.name]);
+    useEffect(()=>{
+        fetchMealsList();
+    },[]);
 
+    const fetchMealsList = async () => {
+        const response = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if(response.status == 200){
+            const data = await response.json();
+            const mealsList:Meal[] = await data.mealslist;
+            setFetchedMealsList(mealsList);
+        }
+    }
     const searchLocalStorageForMeal = async (mealName:string) => {
-        const localStorageMeals = await SecureStore.getItemAsync('meals');
-        if(!localStorageMeals){
-            SecureStore.setItemAsync('meals', '[]')
-            return
-        };
-        const localStorageMealsParsed:Meal[] = JSON.parse(localStorageMeals);
-        const mealsFound = localStorageMealsParsed.filter(element => element.name.toLowerCase().includes(mealName.toLowerCase()));
-        return mealsFound
+            if(fetchedMealsList){
+                const mealsFound = fetchedMealsList.filter(element => element.name.toLowerCase().includes(mealName.toLowerCase()))
+                return mealsFound
+            };
     };
     const search = async (mealName: string) => {
-        setSearchedMeal(mealName);
+        setMeal({...meal ,name: mealName});
         if(mealName){
             setSearchResultsVisible(true);
             setFoundMealsList(await searchLocalStorageForMeal(mealName));
@@ -45,21 +55,40 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
         }
     };
     const removeMealFromStorage = async (mealName: string) => {
-        const localStorage = await SecureStore.getItemAsync('meals');
-        if(!localStorage){
-            return
-        }
-        const localStorageParsed: Meal[] = await JSON.parse(localStorage);
-        const newLocalStorage = localStorageParsed.filter(element => element.name !== mealName);
-        SecureStore.setItemAsync('meals', JSON.stringify(newLocalStorage));
-        setSearchedMeal('');
-        setFoundMealsList(foundMealsList?.filter(element => element.name !== mealName));
+        const response = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if(response.status == 200){
+            const data = await response.json();
+            const mealsList:Meal[] = await data.mealslist;
+            const mealsListWithItemRemoved = mealsList.filter(element => element.name !== mealName);
+            const updatedMealsList = JSON.stringify(mealsListWithItemRemoved);
+            const update = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: `{"mealslist": ${updatedMealsList}}`
+            });
+            if(update.status !== 200){
+                console.log(`Error occured while removing meal from DB`);
+            };
+            setMeal({...meal, name:''});
+            setFoundMealsList([]);
+            setFetchedMealsList(mealsListWithItemRemoved);
+        };
     };
+
     return(
         <View style={{flex:1}}>
             <Searchbar 
             placeholder='Meal Name'
-            value={searchedMeal}
+            value={meal.name}
             onChangeText={input => search(input)}
             />
             {searchResultsVisible && foundMealsList && foundMealsList.map((element, index) => 
@@ -74,7 +103,6 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
                             protein: element.protein
                         });
                         setFoundMealsList([]);
-                        setSearchedMeal(element.name);
                     }}
                 >
                     <List.Item

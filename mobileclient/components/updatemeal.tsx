@@ -8,7 +8,6 @@ import { Meal } from '../screens/homescreen';
 
 
 interface Props {
-
     setMeals: React.Dispatch<React.SetStateAction<Meal[]>>,
     meals: Meal[],
     setShowUpdateMeal: React.Dispatch<React.SetStateAction<boolean>>,
@@ -34,7 +33,7 @@ const UpdateMealComponent: React.FC<Props> = (
             alert('undefined Index, cannot update meal');
             return
         }
-        let newMeals = meals.filter((element,index) => index != passedIndex);
+        let newMeals = meals.filter((element,index) => index !== passedIndex);
         newMeals = [...newMeals, updatedMeal];
         updateDiary(newMeals);
     }
@@ -50,7 +49,16 @@ const UpdateMealComponent: React.FC<Props> = (
                     <IconButton 
                         style={{alignSelf:'flex-end'}}
                         icon='window-close' 
-                        onPress={() => setShowUpdateMeal(false)}
+                        onPress={() => {
+                            setShowUpdateMeal(false);
+                            setMeal({
+                                name: '',
+                                weight: 0,
+                                carbs: 0,
+                                fat: 0,
+                                protein: 0,
+                            });
+                        }}
                     />
                         <View style={{display:'flex', flexDirection: 'row',}}>
                             <TextInput
@@ -104,7 +112,7 @@ const UpdateMealComponent: React.FC<Props> = (
                     <View style={{ flexDirection:'row' ,justifyContent:'center', marginTop:60}}>
                         <View style={styles.calorieCount}>
                             <Text style={{ fontWeight:'bold' }}>Calories in the meal</Text>
-                            <Text>{countCalories()}</Text>
+                            <Text>{countCalories().toFixed()}</Text>
                         </View>
                         <Button 
                             style={styles.flexBttn} 

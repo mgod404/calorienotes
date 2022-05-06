@@ -34,7 +34,7 @@ const BottomBarComponent: React.FC<Props> = ({meals, setShowSettings, targetCalo
                     Carbs
                 </Text>
                 <Text>
-                    {countTotalMacro('carbs')}
+                    {countTotalMacro('carbs').toFixed()}
                 </Text>
             </View>
             <View style={styles.totalView}>
@@ -42,7 +42,7 @@ const BottomBarComponent: React.FC<Props> = ({meals, setShowSettings, targetCalo
                     Fat
                 </Text>
                 <Text>
-                    {countTotalMacro('fat')}
+                    {countTotalMacro('fat').toFixed()}
                 </Text>
             </View>
             <View style={styles.totalView}>
@@ -50,7 +50,7 @@ const BottomBarComponent: React.FC<Props> = ({meals, setShowSettings, targetCalo
                     Protein
                 </Text>
                 <Text style={Number(countTotalMacro('protein')) < targetCalories ? styles.redFont : styles.greenFont}>
-                    {countTotalMacro('protein')} / {targetProtein}
+                    {Math.floor(countTotalMacro('protein'))} / {targetProtein}
                 </Text>
             </View>
             <View style={styles.totalView}>

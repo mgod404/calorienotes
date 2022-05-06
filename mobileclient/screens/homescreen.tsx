@@ -68,6 +68,9 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
     const [targetCalories, setTargetCalories] = useState(2000);
     const [targetProtein, setTargetProtein] = useState(100);
 
+    //to disable a useEffect when the screen renders
+    const [renderCounter, setRenderCounter] = useState(0);
+
     const [diaryData, setDiaryData] = useState<DiaryFetchData[]>();
     const setInitialDiaryData = async () => {
         try{
@@ -114,26 +117,48 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                     body: JSON.stringify(newDayDataParsed)
                 });
                 if(createDiary.status == 201) {
-                    console.log('New Diary created');
                     setDiaryData([newDayData]);
-                } else {
-                    console.log(`Couldn't create new diary ${createDiary.status}`);
-                }
+                } 
                 return
             } 
-            console.log(`Unknown problem, code status ${response.status} accesstoken ${jwt?.jwtAccessToken}`);
         }
         catch (e) {
             console.error(e);
         }
     }
 
+    const updateBackendData = async () => {
+        const updateBody = JSON.stringify({diary: diaryData});
+            try{
+                const updateDiary = await fetch(`http://192.168.0.242:8000/api/diary/`, {
+                    method:'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: updateBody
+                });
+                if(updateDiary.status !== 200){
+                    console.log(`Error when updating diary in DB`);
+                }
+            } 
+            catch (e){
+                console.error(e);
+            }
+    }
+
     useEffect(() => {
         setInitialDiaryData();
     },[]);
+    useEffect(() => {
+        if(renderCounter < 2){
+            setRenderCounter(renderCounter + 1);
+            return
+        }
+        updateBackendData();
+    },[diaryData]);
 
     const update = async (inputMeals: Meal[], inputNote:string, inputTargetCalories: number, inputTargetProtein: number) => {
-        console.log('Updating Diary');
         if(diaryData){
             const isoDate = date.toISOString().split('T');
             const diaryWithoutUpdatedDay = diaryData.filter(element => element.date !== isoDate[0]);
@@ -147,30 +172,16 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                 }
             }
             setDiaryData([...diaryWithoutUpdatedDay, newDateData]);
-            const updateBody = JSON.stringify({diary: diaryData});
-            const updateDiary = await fetch(`http://192.168.0.242:8000/api/diary/`, {
-                method:'PUT',
-                headers: {
-                    'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: updateBody
-            });
-            console.log(updateDiary.status);
-        } else {
-            console.log('Diary data not found');
         }
     }
 
     const getDiary = async () => {
         if(diaryData){
-            console.log('changin date');
             const isoDate = date.toISOString().split('T');
             const dayData = diaryData.filter(element => element.date === isoDate[0])
             if(!dayData[0]){
                 return
             }
-            console.log(dayData[0]);
             setNote(dayData[0].additional_note);
             setMeals(dayData[0].meals);
             if(dayData[0].target_macros.target_calories){
@@ -184,7 +195,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
 
     //When date changes, the content of app changes(meals, note)
     useEffect(() => {
-        console.log(JSON.stringify(diaryData));
         setMeals([]);
         setNote('');
         getDiary();
@@ -203,7 +213,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
         passedTargetCalories = targetCalories, 
         passedTargetProtein = targetProtein
     ) => {
-        console.log('fn ran');
         setNote(passedNote);
         setMeals(passedMeals);
         setTargetCalories(passedTargetCalories);

@@ -69,7 +69,7 @@ const MealListItemComponent:React.FC<Props> = (
                 }}>
                     <DataTable.Row>
                         <DataTable.Cell>{meal.name}</DataTable.Cell>
-                        <DataTable.Cell numeric>{meal.protein * meal.weight/100}</DataTable.Cell>
+                        <DataTable.Cell numeric>{(meal.protein * meal.weight/100).toFixed()}</DataTable.Cell>
                         <DataTable.Cell numeric>{countCalories(meal.weight,meal.carbs,meal.fat,meal.protein).toFixed()}</DataTable.Cell>
                         <DataTable.Cell numeric>
                             <IconButton 

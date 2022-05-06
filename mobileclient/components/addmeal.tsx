@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { View, StyleSheet, Modal, TextInput } from 'react-native'
 import { Button, IconButton, Text, Divider } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store'
 
 import BarCodeScannerComponent from './barcodescanner';
 import MealSearchBarComponent from './mealsearchbar';
+
+import { JwtTokenContext } from '../contexts/jwttoken';
 
 import { Meal } from '../screens/homescreen';
 
@@ -28,7 +30,7 @@ const AddMealComponent: React.FC<Props> = (
         updateDiary
     }) => {
     const [showBarCodeScanner, setShowBarCodeScanner] = useState<boolean>(false);
-
+    const jwt = useContext(JwtTokenContext);
 
     const updateMeals = () => {
         let newMeals:Meal[] = [...meals, meal];
@@ -37,20 +39,51 @@ const AddMealComponent: React.FC<Props> = (
     const countCalories = () => {
         return Math.round(meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
     }
+    // const addMealToLocalStorage = async () => {
+    //     const localStorageMeals = await SecureStore.getItemAsync('meals');
+    //     console.log(localStorageMeals);
+    //     if(!localStorageMeals){
+    //         SecureStore.setItemAsync('meals', '[]')
+    //         return
+    //     }
+    //     const localStorageMealsParsed:Meal[] = JSON.parse(localStorageMeals);
+    //     const mealInStorage = localStorageMealsParsed.filter(element => element.name == meal.name);
+    //     if(mealInStorage[0]){
+    //         return
+    //     }
+    //     SecureStore.setItemAsync('meals', JSON.stringify([...localStorageMealsParsed, meal]));
+    // }
     const addMealToLocalStorage = async () => {
-        const localStorageMeals = await SecureStore.getItemAsync('meals');
-        console.log(localStorageMeals);
-        if(!localStorageMeals){
-            SecureStore.setItemAsync('meals', '[]')
-            return
-        }
-        const localStorageMealsParsed:Meal[] = JSON.parse(localStorageMeals);
-        const mealInStorage = localStorageMealsParsed.filter(element => element.name == meal.name);
-        if(mealInStorage[0]){
-            return
-        }
-        SecureStore.setItemAsync('meals', JSON.stringify([...localStorageMealsParsed, meal]));
-    }
+        const response = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if(response.status == 200){
+            const data = await response.json();
+            const mealsList:Meal[] = await data.mealslist;
+            const mealInStorage = mealsList.filter(element => element.name == meal.name);
+            if(mealInStorage[0]){
+                return
+            };
+            const updatedMealsList = JSON.stringify([...mealsList, meal]);
+            console.log(updatedMealsList);
+            const update = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: `{"mealslist": ${updatedMealsList}}`
+            });
+            if(update.status !== 200){
+                console.log(`Error occured while updating meals, error status: ${update.status}, PUT body: '{"mealslist": ${updatedMealsList}}'`);
+            }
+        };
+    };
+
 
     return(
         <Modal transparent visible={true}>

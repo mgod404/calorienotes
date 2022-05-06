@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-from .serializers import DiarySerializer, NoteSerializer, UserSerializer
+from .serializers import DiarySerializer, MealslistSerializer, NoteSerializer, UserSerializer
 from .models import Note, Diary
 
 
@@ -82,6 +82,21 @@ class CreateDiary(generics.CreateAPIView):
 
 class RetrieveUpdateDiary(generics.RetrieveUpdateAPIView):
     serializer_class = DiarySerializer
+    permissions_classes = []
+
+    def get_queryset(self):
+        return Diary.objects.filter(user=self.request.user.id)
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        filter_kwargs = {'user': self.request.user.id}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+class RetrieveUpdateMealslist(generics.RetrieveUpdateAPIView):
+    serializer_class = MealslistSerializer
     permissions_classes = []
 
     def get_queryset(self):

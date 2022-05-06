@@ -13,5 +13,6 @@ class Note(models.Model):
 class Diary(models.Model):
     user = models.ForeignKey(User, related_name='diary', on_delete=models.CASCADE)
     diary = models.JSONField(blank=True)
+    mealslist = models.JSONField(blank=True, default='NULL')
     def __str__(self) -> str:
         return f'{self.user}'
