@@ -19,14 +19,21 @@ from rest_framework_simplejwt.views import (
 )
 from django.urls import path
 
-from .views import RegisterView, CreateNotes, RetrieveUpdateMealslist, RetrieveUpdateNotes, RetrieveUpdateDiary, CreateDiary
+from .views import (
+    RegisterView, 
+    RetrieveUpdateMealslist, 
+    RetrieveUpdateDiary, 
+    CreateDiary, 
+    ResetPasswordView, 
+    NewPasswordView
+)
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
+    path('resetpassword/', ResetPasswordView.as_view(), name='reset-password'),
+    path('newpassword/', NewPasswordView.as_view(), name='new-password'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('notes/create/', CreateNotes.as_view(), name='create-notes'),
-    path('notes/<int:year>/<int:month>/<int:day>/', RetrieveUpdateNotes.as_view(), name='retrieve-notes'),
     path('diary/create/', CreateDiary.as_view(), name='create-diary'),
     path('diary/', RetrieveUpdateDiary.as_view(), name='retrieve-update-diary'),
     path('mealslist/', RetrieveUpdateMealslist.as_view(), name='retrieve-update-mealslist')

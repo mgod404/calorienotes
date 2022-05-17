@@ -9,4 +9,6 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-
+      - SECRET_KEY=iryqc^@%#zuhoxqk!njzd+-5b=y)qh=jlr0jt)4c-y_6bpynli
+      - EMAIL=xxx.avendite@gmail.com
+      - EMAIL_PASSWORD=Whrrypri6
