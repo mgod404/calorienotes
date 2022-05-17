@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState } from 'react'
 import { StyleSheet, TextInput, View, Text, Button, Alert } from 'react-native'
-import { Switch } from 'react-native-paper';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as SecureStore from 'expo-secure-store'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+
+import { BACKEND_URL } from '../CONFIG'
 
 type RootStackParamList = {
     Login: undefined
@@ -25,34 +25,39 @@ const SignUpScreen = ({ navigation }: NavigateProps) => {
 
     const signUp =  async () => {
         const signUpBody:SignUp = {email:email, password:password}
-        const response = await fetch(`http://192.168.0.242:8000/api/register/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(signUpBody)
-        });
-        if(response.status == 201){
-            Alert.alert(
-                "Registration Successful!","You've signed up successfully! You can login now!",
-                [
-                    {
-                        text: "GO TO LOGIN PAGE",
-                        onPress: () => navigation.navigate('Login'),
-                    }
-                ],
-            );
-        };
-        if(response.status == 400){
-            const resData:SignUp = await response.json();
-            if(resData.email){
-                setErrorMessage(resData.email);
-                return
+        try{
+            const response = await fetch(`${BACKEND_URL}/api/register/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(signUpBody)
+            });
+            if(response.status == 201){
+                Alert.alert(
+                    "Registration Successful!","You've signed up successfully! You can login now!",
+                    [
+                        {
+                            text: "GO TO LOGIN PAGE",
+                            onPress: () => navigation.navigate('Login'),
+                        }
+                    ],
+                );
             };
-            if(resData.password){
-                setErrorMessage(resData.password);
-                return
-            };
+            if(response.status == 400){
+                const resData:SignUp = await response.json();
+                if(resData.email){
+                    setErrorMessage(`Email: ${resData.email}`);
+                    return
+                };
+                if(resData.password){
+                    setErrorMessage(`Password: ${resData.password}`);
+                    return
+                };
+            }
+        }
+        catch(e) {
+            e instanceof Error ? setErrorMessage(e.message): setErrorMessage(String(e));
         }
     }
 

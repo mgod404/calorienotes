@@ -50,8 +50,8 @@ const BarCodeScannerComponent: React.FC<Props> = ({setShowBarCodeScanner, setMea
                 alert(`Product has been found, but lacked macronutrient data`);
             }
         }
-        catch (error) {
-            alert(error);
+        catch (e) {
+            e instanceof Error ? alert(e.message): alert(String(e));
         }
     }
 
@@ -59,7 +59,6 @@ const BarCodeScannerComponent: React.FC<Props> = ({setShowBarCodeScanner, setMea
     setScanned(true);
     fetchFoodData(data);
     setShowBarCodeScanner(false);
-    console.log(`Bar code with type ${type} and data ${data} has been scanned!`);
     };
 
     return (
@@ -90,7 +89,7 @@ export default BarCodeScannerComponent;
 
 const styles = StyleSheet.create({
     container:{
-        flex:1,
+        height:'100%',
     },
     AndroidSafeArea: {
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,

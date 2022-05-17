@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as SecureStore from 'expo-secure-store'
 
 import {JwtTokenContext} from '../contexts/jwttoken'
+import { BACKEND_URL } from '../CONFIG'
 
 type RootStackParamList = {
     Home: undefined,
@@ -34,29 +35,29 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
     const getNewAccessToken = async (refreshToken:string) => {
         try{
             console.log('fetching new access token')
-            const response = await fetch(`http://192.168.0.242:8000/api/token/refresh/`,{
+            const response = await fetch(`${BACKEND_URL}/api/token/refresh/`,{
                 method: 'POST',
                 headers:{
                     'Content-Type': 'application/json'
                 },
                 body: `{"refresh":"${refreshToken}"}`
             })
-            if(response.status === 200){
+            if(response.status === 200) {
                 const data:NewAccessTokenResponse = await response.json();
                 jwt?.setJwtAccessToken(data.access);
                 console.log('new Access Key obtained');
-            }if(response.status == 401){
+            } if(response.status == 401) {
                 jwt?.setJwtRefreshToken('');
                 await SecureStore.setItemAsync('jwt_refresh_token', '');
                 setErrorMessage('Token has expired. Please login again.');
-            }else{
+            } else {
                 jwt?.setJwtRefreshToken('');
                 await SecureStore.setItemAsync('jwt_refresh_token', '');
                 setErrorMessage('Unknown error occured. Please login again.');
             }
         }
         catch (e){
-            console.error(e);
+            e instanceof Error ? setErrorMessage(e.message): setErrorMessage(String(e));
         }
     }
     const checkForRefreshKeyInStorage = async () => {
@@ -76,7 +77,7 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
 
     const login = async () => {
         try {
-            const response = await fetch(`http://192.168.0.242:8000/api/token/`, {
+            const response = await fetch(`${BACKEND_URL}/api/token/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

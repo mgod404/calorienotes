@@ -5,6 +5,7 @@ import { Searchbar, List } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 
 import { JwtTokenContext } from '../contexts/jwttoken';
+import { BACKEND_URL } from '../CONFIG';
 
 import { Meal } from '../screens/homescreen';
 
@@ -24,7 +25,7 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
     },[]);
 
     const fetchMealsList = async () => {
-        const response = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+        const response = await fetch(`${BACKEND_URL}/api/mealslist/`,{
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
@@ -55,7 +56,7 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
         }
     };
     const removeMealFromStorage = async (mealName: string) => {
-        const response = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+        const response = await fetch(`${BACKEND_URL}/api/mealslist/`,{
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
@@ -67,7 +68,7 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
             const mealsList:Meal[] = await data.mealslist;
             const mealsListWithItemRemoved = mealsList.filter(element => element.name !== mealName);
             const updatedMealsList = JSON.stringify(mealsListWithItemRemoved);
-            const update = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+            const update = await fetch(`${BACKEND_URL}/api/mealslist/`,{
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${jwt?.jwtAccessToken}`,

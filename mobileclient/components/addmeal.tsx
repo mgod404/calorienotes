@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useContext } from 'react'
 import { View, StyleSheet, Modal, TextInput } from 'react-native'
-import { Button, IconButton, Text, Divider } from 'react-native-paper';
-import * as SecureStore from 'expo-secure-store'
-
+import { Button, IconButton, Text } from 'react-native-paper';
 import BarCodeScannerComponent from './barcodescanner';
 import MealSearchBarComponent from './mealsearchbar';
 
 import { JwtTokenContext } from '../contexts/jwttoken';
+import { BACKEND_URL } from '../CONFIG';
 
 import { Meal } from '../screens/homescreen';
 
@@ -39,22 +38,8 @@ const AddMealComponent: React.FC<Props> = (
     const countCalories = () => {
         return Math.round(meal.weight / 100 * (meal.carbs * 4 + meal.fat * 9 + meal.protein * 4))
     }
-    // const addMealToLocalStorage = async () => {
-    //     const localStorageMeals = await SecureStore.getItemAsync('meals');
-    //     console.log(localStorageMeals);
-    //     if(!localStorageMeals){
-    //         SecureStore.setItemAsync('meals', '[]')
-    //         return
-    //     }
-    //     const localStorageMealsParsed:Meal[] = JSON.parse(localStorageMeals);
-    //     const mealInStorage = localStorageMealsParsed.filter(element => element.name == meal.name);
-    //     if(mealInStorage[0]){
-    //         return
-    //     }
-    //     SecureStore.setItemAsync('meals', JSON.stringify([...localStorageMealsParsed, meal]));
-    // }
     const addMealToLocalStorage = async () => {
-        const response = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+        const response = await fetch(`${BACKEND_URL}/api/mealslist/`,{
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
@@ -70,7 +55,7 @@ const AddMealComponent: React.FC<Props> = (
             };
             const updatedMealsList = JSON.stringify([...mealsList, meal]);
             console.log(updatedMealsList);
-            const update = await fetch(`http://192.168.0.242:8000/api/mealslist/`,{
+            const update = await fetch(`${BACKEND_URL}/api/mealslist/`,{
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${jwt?.jwtAccessToken}`,

@@ -5,6 +5,7 @@ import { IconButton, Text } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store'
 
 import { JwtTokenContext } from '../contexts/jwttoken';
+import { BACKEND_URL } from '../CONFIG';
 
 import DatePickerComponent from '../components/datepicker'
 import MealListItemComponent from '../components/meallistitem'
@@ -74,7 +75,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
     const [diaryData, setDiaryData] = useState<DiaryFetchData[]>();
     const setInitialDiaryData = async () => {
         try{
-            const response = await fetch(`http://192.168.0.242:8000/api/diary/`,{
+            const response = await fetch(`${BACKEND_URL}/api/diary/`,{
                 method:'GET',
                 headers: {
                     'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
@@ -108,7 +109,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                     }
                 }
                 const newDayDataParsed:DiaryGetData = {diary: [newDayData]};
-                const createDiary = await fetch(`http://192.168.0.242:8000/api/diary/create/`, {
+                const createDiary = await fetch(`${BACKEND_URL}/api/diary/create/`, {
                     method:'POST',
                     headers: {
                         'Authorization': `Bearer ${jwt?.jwtAccessToken}`,

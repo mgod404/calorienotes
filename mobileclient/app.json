@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "calorienotes",
+    "name": "CNotes",
     "slug": "calorienotes",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,9 +20,11 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.calorienotes",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#9400d3"
       }
     },
     "web": {
