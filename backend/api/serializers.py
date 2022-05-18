@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueForDateValidator
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
@@ -57,7 +56,7 @@ class PasswordResetTokenSerializer(serializers.ModelSerializer):
         return PasswordResetToken.objects.create(token=token,user=user)
 
 
-# The serializer throws error "This Field is Required despite filling all fields in post request."
+# The serializer throws error "This Field is Required" despite filling all fields in post request.
 class NewPasswordSerializer(serializers.ModelSerializer):
     password = serializers.CharField(allow_blank=False, write_only=True)
     user = serializers.EmailField(allow_blank=False)
@@ -68,7 +67,7 @@ class NewPasswordSerializer(serializers.ModelSerializer):
     def validate(self, data):
         try:
             print(data['token'])
-            get_token_info = PasswordResetToken.objects.get(user=data['user'], token=data['token'])
+            get_token_info = PasswordResetToken.objects.get(user__email=data['user'], token=data['token'])
             creation_date = get_token_info.date_of_creation
             datetime_now = datetime.now(timezone.utc)
             time_dif = datetime_now - creation_date

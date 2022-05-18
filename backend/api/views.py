@@ -1,8 +1,10 @@
+import os
 from datetime import datetime, timezone
 
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
@@ -74,13 +76,20 @@ class RetrieveUpdateMealslist(generics.RetrieveUpdateAPIView):
 class ResetPasswordView(generics.CreateAPIView):
     serializer_class = PasswordResetTokenSerializer
     queryset = PasswordResetToken.objects.all()
-
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class NewPasswordView(generics.GenericAPIView):
     serializer_class = NewPasswordSerializer
     def post(self, request):
         data = request.data
         print(data['user'])
+
+        #Normally I'd make validation in the serialzer, but for some reason NewPasswordSerializer was throwing errors
         try:
             token_data = PasswordResetToken.objects.get(token=data['token'])
             if token_data.user.email != data['user']:
@@ -89,8 +98,9 @@ class NewPasswordView(generics.GenericAPIView):
             datetime_now = datetime.now(timezone.utc)
             time_dif = datetime_now - creation_date
             if time_dif.total_seconds() > 600:
-                return Response({'message': 'Token has expired. Please get a new one.'})
-            user = User.objects.get(user__email=data['user'])
+                return Response({'message': 'Token has expired. Please get a new one.'}, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(email=data['user'])
+            print('HERE')
             user.password = data['password']
             user.save()
             return Response({'message': 'Your password has been changed!'}, status=status.HTTP_200_OK)
