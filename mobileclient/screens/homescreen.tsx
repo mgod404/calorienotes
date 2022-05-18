@@ -131,7 +131,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
     const updateBackendData = async () => {
         const updateBody = JSON.stringify({diary: diaryData});
             try{
-                const updateDiary = await fetch(`http://192.168.0.242:8000/api/diary/`, {
+                const updateDiary = await fetch(`${BACKEND_URL}/api/diary/`, {
                     method:'PUT',
                     headers: {
                         'Authorization': `Bearer ${jwt?.jwtAccessToken}`,
@@ -148,7 +148,19 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
             }
     }
 
+    const getDailyTargets = async () =>{
+        const targets = await SecureStore.getItemAsync('dailyTargets');
+        if(!targets){
+            return
+        };
+        console.log('Found daily targets ');
+        const targetsParsed = await JSON.parse(targets);
+        setTargetProtein(targetsParsed.targetProtein);
+        setTargetCalories(targetsParsed.targetCalories);
+    }
+
     useEffect(() => {
+        getDailyTargets();
         setInitialDiaryData();
     },[]);
     useEffect(() => {
@@ -178,9 +190,11 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
 
     const getDiary = async () => {
         if(diaryData){
+            console.log(diaryData);
             const isoDate = date.toISOString().split('T');
             const dayData = diaryData.filter(element => element.date === isoDate[0])
             if(!dayData[0]){
+                getDailyTargets();
                 return
             }
             setNote(dayData[0].additional_note);
@@ -191,7 +205,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
             if(dayData[0].target_macros.target_protein){
                 setTargetProtein(dayData[0].target_macros.target_protein);
             }
-        }
+        };
     }
 
     //When date changes, the content of app changes(meals, note)
@@ -266,7 +280,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                     /> }
                 { showUpdateMeal && 
                     <UpdateMealComponent 
-                        setMeals={setMeals}
                         meals={meals}
                         setShowUpdateMeal={setShowUpdateMeal}
                         updateMealIndex={updateMealIndex}

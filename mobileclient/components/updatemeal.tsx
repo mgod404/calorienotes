@@ -8,7 +8,6 @@ import { Meal } from '../screens/homescreen';
 
 
 interface Props {
-    setMeals: React.Dispatch<React.SetStateAction<Meal[]>>,
     meals: Meal[],
     setShowUpdateMeal: React.Dispatch<React.SetStateAction<boolean>>,
     updateMealIndex: number | undefined,
@@ -19,7 +18,6 @@ interface Props {
 
 const UpdateMealComponent: React.FC<Props> = (
     { 
-        setMeals, 
         meals, 
         setShowUpdateMeal, 
         updateMealIndex, 

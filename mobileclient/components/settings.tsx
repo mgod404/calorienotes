@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { View, StyleSheet, Modal, Text, TextInput} from 'react-native'
 import { IconButton, Button } from 'react-native-paper';
+import * as SecureStore from 'expo-secure-store'
 
 import { Meal } from '../screens/homescreen';
 
@@ -24,6 +25,19 @@ const SettingsComponent: React.FC<Props> = ({
     updateDiary
     }) => {
 
+        const setTargets = async (targetKey: string, targetValue: number) => {
+            let currTargets = await SecureStore.getItemAsync('dailyTargets');
+            if(!currTargets){
+                currTargets = JSON.stringify({targetCalories, targetProtein});
+                SecureStore.setItemAsync('dailyTargets',currTargets);
+            }
+            const currTargetsParsed = await JSON.parse(currTargets);
+            let newTargets = await {...currTargetsParsed};
+            console.log(newTargets);
+            newTargets[targetKey] = targetValue;
+            await SecureStore.setItemAsync('dailyTargets', JSON.stringify(newTargets));
+        }
+
     return(
         <Modal transparent visible={true}>
             <View style={styles.container}>
@@ -37,6 +51,7 @@ const SettingsComponent: React.FC<Props> = ({
                                 onChangeText={(input) => {
                                     setTargetCalories(+input);
                                     updateDiary(undefined,undefined,+input);
+                                    setTargets('targetCalories', +input);
                                 }}
                             />
                         </View>
@@ -50,6 +65,7 @@ const SettingsComponent: React.FC<Props> = ({
                                 onChangeText={(input) => {
                                     setTargetProtein(+input);
                                     updateDiary(undefined,undefined,undefined,+input);
+                                    setTargets('targetProtein', +input);
                                 }}
                             />
                         </View>
@@ -69,7 +85,7 @@ const SettingsComponent: React.FC<Props> = ({
             </View>
         </Modal>
     )
-}
+};
 
 export default SettingsComponent
 

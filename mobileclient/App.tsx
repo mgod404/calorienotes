@@ -8,6 +8,7 @@ import { JwtTokenContextProvider}  from './contexts/jwttoken'
 import HomeScreen from './screens/homescreen'
 import LoginScreen from './screens/loginscreen'
 import SignUpScreen from './screens/signup'
+import NewPasswordScreen from './screens/newpasswordscreen'
 
 
 
@@ -43,6 +44,7 @@ const App = () => {
           <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}}/>
           <Stack.Screen name="Login" component={LoginScreen} options={{headerShown:false}}/>
           <Stack.Screen name="Signup" component={SignUpScreen} options={{headerShown:false}}/>
+          <Stack.Screen name="NewPassword" component={NewPasswordScreen} options={{headerShown:false}}/>
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

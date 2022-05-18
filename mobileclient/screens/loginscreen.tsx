@@ -9,7 +9,8 @@ import { BACKEND_URL } from '../CONFIG'
 
 type RootStackParamList = {
     Home: undefined,
-    Signup: undefined
+    Signup: undefined,
+    NewPassword: undefined,
 };
 
 interface NavigationProps {
@@ -34,18 +35,16 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
 
     const getNewAccessToken = async (refreshToken:string) => {
         try{
-            console.log('fetching new access token')
             const response = await fetch(`${BACKEND_URL}/api/token/refresh/`,{
                 method: 'POST',
                 headers:{
                     'Content-Type': 'application/json'
                 },
                 body: `{"refresh":"${refreshToken}"}`
-            })
+            });
             if(response.status === 200) {
                 const data:NewAccessTokenResponse = await response.json();
                 jwt?.setJwtAccessToken(data.access);
-                console.log('new Access Key obtained');
             } if(response.status == 401) {
                 jwt?.setJwtRefreshToken('');
                 await SecureStore.setItemAsync('jwt_refresh_token', '');
@@ -54,18 +53,17 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
                 jwt?.setJwtRefreshToken('');
                 await SecureStore.setItemAsync('jwt_refresh_token', '');
                 setErrorMessage('Unknown error occured. Please login again.');
-            }
+            };
         }
         catch (e){
             e instanceof Error ? setErrorMessage(e.message): setErrorMessage(String(e));
-        }
+        };
     }
     const checkForRefreshKeyInStorage = async () => {
         const storageRefreshToken = await SecureStore.getItemAsync('jwt_refresh_token');
         if(storageRefreshToken){
             //REFRESH TOKEN SAVED AND FOUND, PROCEED 'REMEMBER ME' FUNC FROM HERE 
             setRememberMe(true);
-            console.log(`Jwt refresh token already found ${storageRefreshToken}`);
             await getNewAccessToken(storageRefreshToken);
             navigation.navigate('Home');
         }
@@ -120,13 +118,17 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
                 placeholder="Password"
             />
 
-            <View style={{flexDirection:'row'}}>
+            <View style={styles.underInput}>
             <Switch 
                 color='darkviolet'
                 value={rememberMe}
                 onValueChange={onToggleSwitch}
                 />
-            <Text style={{alignSelf:'center'}}>Remember me</Text>
+            <Text>Remember me</Text>
+            <Text 
+                style={styles.forgotPassword}
+                onPress={() => navigation.navigate('NewPassword')}
+                >Forgot your Password?</Text>
             </View>
 
             {errorMessage ?
@@ -162,6 +164,17 @@ const styles = StyleSheet.create({
         margin: 12,
         borderBottomWidth: 1,
         padding: 10,
+    },
+    underInput: {
+        flexDirection:'row', 
+        alignItems:'center', 
+        justifyContent:'space-between'
+    },
+    forgotPassword: {
+        color:'blue', 
+        alignSelf:'center', 
+        marginLeft:20, 
+        textDecorationLine:'underline'
     },
     buttons: {
         width:'70%',

@@ -100,8 +100,7 @@ class NewPasswordView(generics.GenericAPIView):
             if time_dif.total_seconds() > 600:
                 return Response({'message': 'Token has expired. Please get a new one.'}, status=status.HTTP_400_BAD_REQUEST)
             user = User.objects.get(email=data['user'])
-            print('HERE')
-            user.password = data['password']
+            user.set_password(data['password'])
             user.save()
             return Response({'message': 'Your password has been changed!'}, status=status.HTTP_200_OK)
         except PasswordResetToken.DoesNotExist:
