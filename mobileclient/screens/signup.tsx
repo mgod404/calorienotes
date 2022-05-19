@@ -26,6 +26,7 @@ const SignUpScreen = ({ navigation }: NavigateProps) => {
     const signUp =  async () => {
         const signUpBody:SignUp = {email:email, password:password}
         try{
+            console.log('sending request')
             const response = await fetch(`${BACKEND_URL}/api/register/`, {
                 method: 'POST',
                 headers: {
@@ -55,6 +56,7 @@ const SignUpScreen = ({ navigation }: NavigateProps) => {
                     return
                 };
             }
+            setErrorMessage(`Error status: ${response.status}`);
         }
         catch(e) {
             e instanceof Error ? setErrorMessage(e.message): setErrorMessage(String(e));

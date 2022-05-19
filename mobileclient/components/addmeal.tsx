@@ -12,7 +12,6 @@ import { Meal } from '../screens/homescreen';
 
 interface Props {
     setShowAddMeal: React.Dispatch<React.SetStateAction<boolean>>,
-    setMeals: React.Dispatch<React.SetStateAction<Meal[]>>,
     meals: Meal[],
     meal: Meal,
     setMeal: React.Dispatch<React.SetStateAction<Meal>>,
@@ -21,8 +20,7 @@ interface Props {
 
 const AddMealComponent: React.FC<Props> = (
     {
-        setShowAddMeal, 
-        setMeals, 
+        setShowAddMeal,
         meals, 
         meal, 
         setMeal, 
@@ -54,7 +52,6 @@ const AddMealComponent: React.FC<Props> = (
                 return
             };
             const updatedMealsList = JSON.stringify([...mealsList, meal]);
-            console.log(updatedMealsList);
             const update = await fetch(`${BACKEND_URL}/api/mealslist/`,{
                 method: 'PUT',
                 headers: {
@@ -64,7 +61,7 @@ const AddMealComponent: React.FC<Props> = (
                 body: `{"mealslist": ${updatedMealsList}}`
             });
             if(update.status !== 200){
-                console.log(`Error occured while updating meals, error status: ${update.status}, PUT body: '{"mealslist": ${updatedMealsList}}'`);
+                alert(`Error occured during synchronizing data. Try again later!`);
             }
         };
     };

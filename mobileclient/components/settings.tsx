@@ -33,7 +33,6 @@ const SettingsComponent: React.FC<Props> = ({
             }
             const currTargetsParsed = await JSON.parse(currTargets);
             let newTargets = await {...currTargetsParsed};
-            console.log(newTargets);
             newTargets[targetKey] = targetValue;
             await SecureStore.setItemAsync('dailyTargets', JSON.stringify(newTargets));
         }

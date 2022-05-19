@@ -274,7 +274,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                         meal={meal}
                         setMeal={setMeal}
                         meals={meals}
-                        setMeals={setMeals} 
                         setShowAddMeal={setShowAddMeal}
                         updateDiary={updateDiary}
                     /> }

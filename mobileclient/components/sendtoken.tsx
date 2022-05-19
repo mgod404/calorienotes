@@ -21,7 +21,7 @@ const SendTokenComponent: React.FC<Props>= ({setTokenSent}) => {
                 body: JSON.stringify({user: email})
             });
             if(response.status != 201){
-                console.log(`Error Code: ${response.status}`)
+                alert(`Error Code: ${response.status}`);
                 return
             }
             setTokenSent(true);

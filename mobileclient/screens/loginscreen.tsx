@@ -88,6 +88,7 @@ const LoginScreen = ({ navigation }: NavigationProps) => {
             if(response.status == 200){
                 const data = await response.json();
                 jwt?.setJwtAccessToken(data.access);
+                setErrorMessage('');
                 navigation.navigate('Home');
                 if(rememberMe){
                     jwt?.setJwtRefreshToken(data.refresh);

@@ -78,7 +78,6 @@ const BarCodeScannerComponent: React.FC<Props> = ({setShowBarCodeScanner, setMea
             icon='window-close' 
             onPress={() => {
                 setShowBarCodeScanner(false);
-                console.log('Scanner Closed');
             }}
         />
     </View>

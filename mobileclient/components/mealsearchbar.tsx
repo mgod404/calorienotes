@@ -49,7 +49,6 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
         if(mealName){
             setSearchResultsVisible(true);
             setFoundMealsList(await searchLocalStorageForMeal(mealName));
-            console.log(foundMealsList);
         }else{
             setSearchResultsVisible(false);
             setFoundMealsList([]);
@@ -77,7 +76,7 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
                 body: `{"mealslist": ${updatedMealsList}}`
             });
             if(update.status !== 200){
-                console.log(`Error occured while removing meal from DB`);
+                alert(`Error occured while removing meal from database. Please try again later!`);
             };
             setMeal({...meal, name:''});
             setFoundMealsList([]);

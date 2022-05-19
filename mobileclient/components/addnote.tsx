@@ -36,7 +36,6 @@ const AddNoteComponent: React.FC<Props> = (
                             icon='check'
                             color='darkviolet'
                             onPress={() => {
-                                console.log(`note updated and passed to update ${editedNote}`);
                                 updateDiary(undefined,editedNote);
                                 setShowAddNote(false);
                             }}
