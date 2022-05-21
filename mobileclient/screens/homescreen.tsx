@@ -140,7 +140,7 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
                     body: updateBody
                 });
                 if(updateDiary.status !== 200){
-                    console.log(`Error when updating diary in DB`);
+                    alert(`Error when updating diary in DB`);
                 }
             } 
             catch (e){
@@ -153,7 +153,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
         if(!targets){
             return
         };
-        console.log('Found daily targets ');
         const targetsParsed = await JSON.parse(targets);
         setTargetProtein(targetsParsed.targetProtein);
         setTargetCalories(targetsParsed.targetCalories);
@@ -190,7 +189,6 @@ const HomeScreen = ({ navigation }: NavigateProps) => {
 
     const getDiary = async () => {
         if(diaryData){
-            console.log(diaryData);
             const isoDate = date.toISOString().split('T');
             const dayData = diaryData.filter(element => element.date === isoDate[0])
             if(!dayData[0]){

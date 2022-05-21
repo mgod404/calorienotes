@@ -134,7 +134,7 @@ const AddMealComponent: React.FC<Props> = (
                         />
                         </View>
 
-                    <View style={{ flexDirection:'row' ,justifyContent:'center', marginTop:60}}>
+                    <View style={styles.bottomPart}>
                         <View style={styles.calorieCount}>
                             <Text style={{ fontWeight:'bold' }}>Calories in the meal</Text>
                             <Text>{countCalories()}</Text>
@@ -172,7 +172,7 @@ const AddMealComponent: React.FC<Props> = (
                                 setShowAddMeal(false);
                             }}
                             >
-                                Add Meal
+                                Add
                         </Button>
                     </View>
                 </View>
@@ -223,6 +223,7 @@ const styles = StyleSheet.create({
         alignSelf:'flex-end',
         margin:12, 
         fontSize:23,
+        color:'dimgrey'
     },
     flexBttn: {
         marginRight: 20,
@@ -232,6 +233,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginHorizontal:10,
+    },
+    bottomPart: { 
+        flexDirection:'row',
+        justifyContent:'center', 
+        marginTop:60,
     }
 })
 

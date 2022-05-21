@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, SafeAreaView, Platform, StatusBar  } from 'react-native'
-import { Button } from 'react-native-paper'
+import { Button, IconButton } from 'react-native-paper'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
 interface Props {
@@ -38,28 +38,27 @@ const DatePickerComponent: React.FC<Props> = (props) => {
 return (
     <SafeAreaView style={styles.AndroidSafeArea}>
 
-        <Button 
+        <IconButton 
             icon='chevron-left'
             style={styles.sideButton}
-            labelStyle={{textAlign:'center'}}
-            mode='text' 
+            size={40}
+            color={'white'}
             onPress={() => props.setDate(changeDay(props.date, -1))}
-            >
-        </Button>
+            />
         <Button 
             style={styles.middleButton}
             mode='text' 
             onPress={showDatepicker}
             >
-            <Text>{props.date.toDateString()}</Text>
+            <Text style={{fontSize:20}}>{props.date.toDateString()}</Text>
         </Button>
-        <Button 
+        <IconButton 
             icon='chevron-right'
             style={styles.sideButton}
-            mode='text' 
+            size={40}
+            color={'white'}
             onPress={() => props.setDate(changeDay(props.date, +1))}
-            >
-        </Button>
+            />
         {show && (
         <DateTimePicker
             testID="dateTimePicker"
@@ -68,6 +67,7 @@ return (
             is24Hour={true}
             onChange={onChange}
             textColor ={'darkviolet'}
+            style={{height:100}}
         />
         )}
 
@@ -82,19 +82,23 @@ const styles = StyleSheet.create({
         color:'#d5d8dc',
     },
     sideButton:{
-        flex:0.20,
+        flex:0.2,
         display:'flex',
-        justifyContent:'center'
+        justifyContent:'center',
+        alignSelf:'center',
+        color:'white'
     },
     buttonText: {
         display:'flex',
-        justifyContent:'center'
+        justifyContent:'center',
+        fontSize:50
     },
     AndroidSafeArea: {
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
         flexDirection: 'row',
         justifyContent: 'center',
         backgroundColor: 'darkviolet',
+        height:110
     },
 });
 

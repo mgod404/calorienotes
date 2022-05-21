@@ -39,8 +39,12 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
         }
     }
     const searchLocalStorageForMeal = async (mealName:string) => {
-            if(fetchedMealsList){
-                const mealsFound = fetchedMealsList.filter(element => element.name.toLowerCase().includes(mealName.toLowerCase()))
+            if(!fetchedMealsList){
+                return
+            };
+            console.log(JSON.stringify(fetchedMealsList[1]));
+            const mealsFound = fetchedMealsList.filter(element => element.name.toLowerCase().includes(mealName.toLowerCase()));
+            if(mealsFound){
                 return mealsFound
             };
     };
@@ -90,6 +94,7 @@ const MealSearchBarComponent: React.FC<Props> = ({ meal, setMeal }) => {
             placeholder='Meal Name'
             value={meal.name}
             onChangeText={input => search(input)}
+            style={{elevation:0, borderBottomWidth:1.5, borderBottomColor: 'darkviolet'}}
             />
             {searchResultsVisible && foundMealsList && foundMealsList.map((element, index) => 
                 (<TouchableOpacity

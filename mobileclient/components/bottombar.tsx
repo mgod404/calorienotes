@@ -46,10 +46,10 @@ const BottomBarComponent: React.FC<Props> = ({meals, setShowSettings, targetCalo
                 </Text>
             </View>
             <View style={styles.totalView}>
-                <Text style={Number(countTotalMacro('protein')) < targetCalories ? styles.redFont : styles.greenFont}>
+                <Text style={Number(countTotalMacro('protein')) < targetProtein ? styles.redFont : styles.greenFont}>
                     Protein
                 </Text>
-                <Text style={Number(countTotalMacro('protein')) < targetCalories ? styles.redFont : styles.greenFont}>
+                <Text style={Number(countTotalMacro('protein')) < targetProtein ? styles.redFont : styles.greenFont}>
                     {Math.floor(countTotalMacro('protein'))} / {targetProtein}
                 </Text>
             </View>
